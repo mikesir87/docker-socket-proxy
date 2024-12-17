@@ -18,7 +18,7 @@ export class Config {
     const data = Config.#getData() || {};
 
     if (!data.gates) data.gates = [];
-    if (!data.rewrites) data.rewrites = [];
+    if (!data.mutators) data.mutators = [];
 
     return data;
   }
