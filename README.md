@@ -6,7 +6,51 @@ With this socket, you can share it with other tools that need/want access to a D
 
 Sample use cases might be to remap volume paths, add labels, or block certain registries.
 
-## Getting started
+> **NOTE**
+>
+> Sockets created inside a container and mounted to the host do _not_ work as expected and is a known limitation.
+
+## Quick start
+
+1. Create a new (and proxied) Docker socket by running the following command:
+
+    ```console
+    docker run -d -v docker-socket:/tmp/socket -v /var/run/docker.sock:/var/run/docker.sock -e LISTEN_SOCKET_PATH=/tmp/socket/docker-proxy.sock -e CONFIG_DATA="gates: [ { type: readonly } ]" mikesir87/docker-socket-proxy
+    ```
+
+2. Start a new container, sharing the socket and specifying the `DOCKER_HOST` environment variable.
+
+    ```console
+    docker run -ti -v docker-socket:/tmp/socket -e DOCKER_HOST=unix:///tmp/socket/docker-proxy.sock docker sh
+    ```
+
+3. Try to pull a container image:
+
+    ```console
+    docker pull nginx
+    ```
+
+    You should see the following error:
+
+    ```
+    Error response from daemon: Read-only access is enabled
+    ```
+
+4. Try to create a volume:
+
+   ```console
+   docker volume create test
+   ```
+
+   You should see the same error!
+
+5. But, list all containers. It should work:
+
+   ```console
+   docker ps
+   ```
+
+## Another example
 
 The socket proxy, by default, will allow all requests. To change the rules, you will need to provide a YAML config file (see [Proxy configuration](#proxy-configuration) below).
 
