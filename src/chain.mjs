@@ -1,3 +1,4 @@
+import { AddLabelsMiddleware } from "./middleware/addLabels.mjs";
 import { NamespaceAllowListMiddleware } from "./middleware/namespaceAllowlist.mjs";
 import { ReadonlyAccessMiddleware } from "./middleware/readonlyAccess.mjs";
 import { RegistryBlockerMiddleware } from "./middleware/registryBlocker.mjs";
@@ -8,6 +9,17 @@ export class MiddlewareChain {
   constructor(config) {
     const gates = [];
     const mutators = [];
+  
+    for (let rewrite of config.mutators) {
+      switch (rewrite.type) {
+        case "volumePath":
+          mutators.push(new RewriteVolumePathMiddleware(rewrite));
+          break;
+        case "addLabels":
+          mutators.push(new AddLabelsMiddleware(rewrite));
+          break;
+      }
+    }
 
     for (let gate of config.gates) {
       switch (gate.type) {
@@ -19,14 +31,6 @@ export class MiddlewareChain {
           break;
         case "namespaceAllowlist":
           gates.push(new NamespaceAllowListMiddleware(gate));
-          break;
-      }
-    }
-  
-    for (let rewrite of config.mutators) {
-      switch (rewrite.type) {
-        case "volumePath":
-          mutators.push(new RewriteVolumePathMiddleware(rewrite));
           break;
       }
     }
