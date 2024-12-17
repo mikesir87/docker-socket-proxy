@@ -32,8 +32,9 @@ export class DockerSocketProxy {
    * @returns A Promise that is resolved when the server has stopped
    */
   stop() {
-    return new Promise((acc) => {
-      this.#server.stop(acc);
+    const close = this.#server.close.bind(this.#server);
+    return new Promise(function(acc) {
+      close();
     });
   }
   
