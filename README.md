@@ -6,7 +6,7 @@ With this socket, you can share it with other tools that need/want access to a D
 
 Sample use cases might be to remap volume paths, add labels, or block certain registries.
 
-> **NOTE**
+> [!NOTE]
 >
 > Sockets created inside a container and mounted to the host do _not_ work as expected and is a known limitation.
 
