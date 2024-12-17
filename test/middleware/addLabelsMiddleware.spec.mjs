@@ -7,34 +7,49 @@ describe("AddLabelsMiddleware", () => {
     middleware = new AddLabelsMiddleware({
       labels: {
         "com.example.label": "example",
-        "com.example.label2": "example2"
-      }
+        "com.example.label2": "example2",
+      },
     });
   });
 
   it("requires a labels config", () => {
-    expect(() => new AddLabelsMiddleware({})).toThrow("Missing 'labels' in config");
+    expect(() => new AddLabelsMiddleware({})).toThrow(
+      "Missing 'labels' in config",
+    );
   });
 
   describe("applies", () => {
     it("applies to container creation", () => {
-      expect(middleware.applies("POST", new URL("http://localhost/containers/create"))).toBe(true);
+      expect(
+        middleware.applies(
+          "POST",
+          new URL("http://localhost/containers/create"),
+        ),
+      ).toBe(true);
     });
 
     it("applies to image building", () => {
-      expect(middleware.applies("POST", new URL("http://localhost/images/build"))).toBe(true);
+      expect(
+        middleware.applies("POST", new URL("http://localhost/images/build")),
+      ).toBe(true);
     });
 
     it("applies to network creation", () => {
-      expect(middleware.applies("POST", new URL("http://localhost/networks/create"))).toBe(true);
+      expect(
+        middleware.applies("POST", new URL("http://localhost/networks/create")),
+      ).toBe(true);
     });
 
     it("applies to volume creation", () => {
-      expect(middleware.applies("POST", new URL("http://localhost/volumes/create"))).toBe(true);
+      expect(
+        middleware.applies("POST", new URL("http://localhost/volumes/create")),
+      ).toBe(true);
     });
 
     it("doesn't apply to other URLs", () => {
-      expect(middleware.applies("GET", new URL("http://localhost/containers/json"))).toBe(false);
+      expect(
+        middleware.applies("GET", new URL("http://localhost/containers/json")),
+      ).toBe(false);
     });
   });
 
@@ -43,7 +58,7 @@ describe("AddLabelsMiddleware", () => {
       const requestOptions = {};
       const url = new URL("http://localhost/containers/create");
       const body = {
-        Image: "ubuntu"
+        Image: "ubuntu",
       };
 
       middleware.run(requestOptions, url, body);
@@ -57,7 +72,7 @@ describe("AddLabelsMiddleware", () => {
       const requestOptions = {};
       const url = new URL("http://localhost/images/build");
       const body = {
-        dockerfile: "./"
+        dockerfile: "./",
       };
 
       middleware.run(requestOptions, url, body);
@@ -71,7 +86,7 @@ describe("AddLabelsMiddleware", () => {
       const requestOptions = {};
       const url = new URL("http://localhost/networks/create");
       const body = {
-        dockerfile: "./"
+        dockerfile: "./",
       };
 
       middleware.run(requestOptions, url, body);
@@ -85,7 +100,7 @@ describe("AddLabelsMiddleware", () => {
       const requestOptions = {};
       const url = new URL("http://localhost/volumes/create");
       const body = {
-        dockerfile: "./"
+        dockerfile: "./",
       };
 
       middleware.run(requestOptions, url, body);
@@ -103,7 +118,7 @@ describe("AddLabelsMiddleware", () => {
         Labels: {
           "another.label": "value",
           "com.example.label": "oldvalue",
-        }
+        },
       };
 
       middleware.run(requestOptions, url, body);
@@ -114,5 +129,4 @@ describe("AddLabelsMiddleware", () => {
       expect(body.Labels["another.label"]).toBe("value");
     });
   });
-
 });

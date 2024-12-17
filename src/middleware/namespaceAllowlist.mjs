@@ -15,18 +15,21 @@ export class NamespaceAllowListMiddleware {
   }
 
   run(requestOptions, url, body) {
-    const requestedImage = url.searchParams.get("fromImage") + ":" + url.searchParams.get("tag");
+    const requestedImage =
+      url.searchParams.get("fromImage") + ":" + url.searchParams.get("tag");
 
     const { repository } = parseFamiliarName(requestedImage);
 
-    const namespace = repository.split("/").slice(0, -1).join('/');
-    
+    const namespace = repository.split("/").slice(0, -1).join("/");
+
     if (!this.namespaces.includes(namespace)) {
-      throw new ValidationError(`Access to namespace ${namespace} is forbidden`);
+      throw new ValidationError(
+        `Access to namespace ${namespace} is forbidden`,
+      );
     }
   }
 
   toString() {
-    return `NamespaceAllowListMiddleware - ${this.namespaces.join(',')}`;
+    return `NamespaceAllowListMiddleware - ${this.namespaces.join(",")}`;
   }
 }

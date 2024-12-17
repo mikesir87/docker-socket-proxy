@@ -28,8 +28,7 @@ export class AddLabelsMiddleware {
 
     if (!body[key]) {
       body[key] = this.labels;
-    }
-    else {
+    } else {
       Object.assign(body[key], labels);
     }
   }

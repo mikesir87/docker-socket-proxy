@@ -15,7 +15,8 @@ export class RegistryBlockerMiddleware {
   }
 
   run(requestOptions, url, body) {
-    const requestedImage = url.searchParams.get("fromImage") + ":" + url.searchParams.get("tag");
+    const requestedImage =
+      url.searchParams.get("fromImage") + ":" + url.searchParams.get("tag");
 
     const { domain } = parseFamiliarName(requestedImage);
     if (!this.registries.includes(domain)) {

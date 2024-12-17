@@ -1,5 +1,5 @@
-import http from 'http';
-import fs from 'fs';
+import http from "http";
+import fs from "fs";
 
 export class DockerSocketProxy {
   #server;
@@ -14,12 +14,14 @@ export class DockerSocketProxy {
    * Start the proxy server
    */
   start() {
-    this.#server = http.createServer(this.#onRequestWrapper.bind(this)).listen(this.listenPath);
-    fs.chmodSync(this.listenPath, '777');
+    this.#server = http
+      .createServer(this.#onRequestWrapper.bind(this))
+      .listen(this.listenPath);
+    fs.chmodSync(this.listenPath, "777");
 
-    this.#server.on('upgrade', (req, socket, head) => {
+    this.#server.on("upgrade", (req, socket, head) => {
       console.log(`[UPGRADE REQUEST] ${req.url} - denied`);
-      socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
+      socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
       socket.destroy();
     });
 
@@ -33,23 +35,22 @@ export class DockerSocketProxy {
    */
   stop() {
     const close = this.#server.close.bind(this.#server);
-    return new Promise(function(acc) {
+    return new Promise(function (acc) {
       close();
     });
   }
-  
+
   /**
    * A wrapper for the request that handles errors and allows the actual handler to be async.
    * @param {http.ClientRequest} clientReq The client request
    * @param {http.ServerResponse} clientRes The response going back to the client
    */
   #onRequestWrapper(clientReq, clientRes) {
-    this.#onRequest(clientReq, clientRes)
-      .catch((err) => {
-        console.error(err);
-        clientRes.writeHead(500, { 'Content-Type': 'text/plain' });
-        clientRes.end('Internal Server Error');
-      });
+    this.#onRequest(clientReq, clientRes).catch((err) => {
+      console.error(err);
+      clientRes.writeHead(500, { "Content-Type": "text/plain" });
+      clientRes.end("Internal Server Error");
+    });
   }
 
   /**
@@ -68,27 +69,29 @@ export class DockerSocketProxy {
       method: clientReq.method,
       headers: clientReq.headers,
     };
-  
+
     const url = new URL(`http://localhost${clientReq.url}`);
-  
+
     // Bail early without reading the body if needed
     if (!this.middlewareChain.hasApplyingMiddleware(clientReq.method, url)) {
       this.#sendProxyRequest(clientReq, clientRes, options);
       return;
     }
-  
+
     const body = await this.#readRequestData(clientReq);
-  
+
     try {
       this.middlewareChain.applyMiddleware(options, url, body);
     } catch (err) {
       const statusCode = err.name === "ValidationError" ? 403 : 500;
-      console.log(`[${clientReq.method}] ${clientReq.url} - ${statusCode} - ${err.message}`);
-      clientRes.writeHead(statusCode, { 'Content-Type': 'application/json' });
+      console.log(
+        `[${clientReq.method}] ${clientReq.url} - ${statusCode} - ${err.message}`,
+      );
+      clientRes.writeHead(statusCode, { "Content-Type": "application/json" });
       clientRes.end(JSON.stringify({ message: err.message }));
       return;
     }
-  
+
     const bodyString = body ? JSON.stringify(body) : null;
     this.#sendProxyRequest(clientReq, clientRes, options, bodyString);
   }
@@ -102,18 +105,18 @@ export class DockerSocketProxy {
    */
   #sendProxyRequest(clientReq, clientRes, proxyRequestOptions, bodyToSend) {
     if (bodyToSend && bodyToSend.length > 0)
-      proxyRequestOptions.headers['content-length'] = Buffer.byteLength(bodyToSend);
-  
-    const proxyRequest = http.request(proxyRequestOptions, (proxyResponse) => {   
+      proxyRequestOptions.headers["content-length"] =
+        Buffer.byteLength(bodyToSend);
+
+    const proxyRequest = http.request(proxyRequestOptions, (proxyResponse) => {
       clientRes.writeHead(proxyResponse.statusCode, proxyResponse.headers);
       clientRes.flushHeaders();
-      
+
       proxyResponse.pipe(clientRes);
     });
-  
-    if (bodyToSend)
-      proxyRequest.write(bodyToSend);
-  
+
+    if (bodyToSend) proxyRequest.write(bodyToSend);
+
     clientReq.pipe(proxyRequest);
   }
 
@@ -123,32 +126,33 @@ export class DockerSocketProxy {
    * @returns {Promise<string|object|null>} The body of the request
    */
   #readRequestData(req) {
-    const maxLength = req.headers['content-length'] ? 
-      parseInt(req.headers['content-length']) : 0;
-      
+    const maxLength = req.headers["content-length"]
+      ? parseInt(req.headers["content-length"])
+      : 0;
+
     if (maxLength === 0) {
       return Promise.resolve(null);
     }
-  
+
     return new Promise((acc) => {
       let body = [];
       let bodyLength = 0;
-  
+
       function handleData(chunk) {
         body.push(chunk);
         bodyLength += chunk.length;
-        
+
         if (bodyLength === maxLength) {
           body = Buffer.concat(body).toString();
-          if (req.headers['content-type'] === 'application/json') {
+          if (req.headers["content-type"] === "application/json") {
             body = JSON.parse(body);
           }
-          req.removeListener('data', handleData);
+          req.removeListener("data", handleData);
           acc(body);
         }
       }
-  
-      req.on('data', handleData);
+
+      req.on("data", handleData);
     });
   }
 }

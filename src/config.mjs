@@ -1,5 +1,5 @@
-import fs from 'fs';
-import YAML from 'yaml';
+import fs from "fs";
+import YAML from "yaml";
 
 export class Config {
   static getForwardingSocketPath() {
@@ -17,11 +17,9 @@ export class Config {
   static getConfigData() {
     const data = Config.#getData() || {};
 
-    if (!data.gates)
-      data.gates = [];
-    if (!data.rewrites)
-      data.rewrites = [];
-  
+    if (!data.gates) data.gates = [];
+    if (!data.rewrites) data.rewrites = [];
+
     return data;
   }
 
@@ -29,11 +27,13 @@ export class Config {
     if (process.env.CONFIG_FILE) {
       return YAML.parse(fs.readFileSync(process.env.CONFIG_FILE, "utf8"));
     }
-  
+
     if (process.env.CONFIG_DATA) {
       return YAML.parse(process.env.CONFIG_DATA);
     }
-  
-    throw new Error("No configuration provided. Either CONFIG_FILE or CONFIG_DATA must be set");
+
+    throw new Error(
+      "No configuration provided. Either CONFIG_FILE or CONFIG_DATA must be set",
+    );
   }
 }

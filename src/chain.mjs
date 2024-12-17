@@ -5,11 +5,10 @@ import { RegistryBlockerMiddleware } from "./middleware/registryBlocker.mjs";
 import { RewriteVolumePathMiddleware } from "./middleware/rewriteVolumePath.mjs";
 
 export class MiddlewareChain {
-  
   constructor(config) {
     const gates = [];
     const mutators = [];
-  
+
     for (let rewrite of config.mutators) {
       switch (rewrite.type) {
         case "volumePath":
@@ -37,7 +36,7 @@ export class MiddlewareChain {
 
     this.gates = gates;
     this.mutators = mutators;
-    this.chain = [ ...gates, ...mutators ];
+    this.chain = [...gates, ...mutators];
   }
 
   hasApplyingMiddleware(method, url) {
@@ -64,6 +63,8 @@ export class MiddlewareChain {
   }
 
   toString() {
-    return this.chain.map(middleware => `-- ${middleware.toString()}`).join("\n");
+    return this.chain
+      .map((middleware) => `-- ${middleware.toString()}`)
+      .join("\n");
   }
 }
