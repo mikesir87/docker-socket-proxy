@@ -1,0 +1,25 @@
+{
+  "name": "docker-socket-proxy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon src/index.mjs",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test-watch": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll"
+  },
+  "dependencies": {
+    "@swimlane/docker-reference": "^2.0.1",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9"
+  },
+  "jest": {
+    "transform": {},
+    "testMatch": [
+      "**/*.spec.mjs"
+    ]
+  }
+}
