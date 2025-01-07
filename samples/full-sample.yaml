@@ -5,6 +5,9 @@ mutators:
   - type: addLabels
     labels:
       com.mikesir87.example: test-value
+  - type: remapImage
+    from: nginx
+    to: nginx:alpine
 
 gates:
   - type: registry

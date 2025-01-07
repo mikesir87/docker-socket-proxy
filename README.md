@@ -156,6 +156,20 @@ mutators:
       another.label: another-value
 ```
 
+### Remap image mutator
+
+The remap image mutator allows you to rewrite the images being used when creating containers. Note that multiple remappings can occur, but only one pass will run using the configured order.
+
+```yaml
+mutators:
+  - type: remapImage
+    from: nginx
+    to: nginx:alpine
+  - type: remapImage
+    from: node:lts
+    to: node:lts-alpine
+```
+
 ## Contributing or requests
 
 If you have requests for different types of mutators, create an issue and let's talk about it!

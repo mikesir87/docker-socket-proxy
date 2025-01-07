@@ -3,6 +3,7 @@ import { NamespaceAllowListMiddleware } from "./middleware/namespaceAllowlist.mj
 import { ReadonlyAccessMiddleware } from "./middleware/readonlyAccess.mjs";
 import { RegistryBlockerMiddleware } from "./middleware/registryBlocker.mjs";
 import { RewriteVolumePathMiddleware } from "./middleware/rewriteVolumePath.mjs";
+import { RemapImageMiddleware } from "./middleware/remapImage.mjs";
 
 export class MiddlewareChain {
   constructor(config) {
@@ -16,6 +17,9 @@ export class MiddlewareChain {
           break;
         case "addLabels":
           mutators.push(new AddLabelsMiddleware(rewrite));
+          break;
+        case "remapImage":
+          mutators.push(new RemapImageMiddleware(rewrite));
           break;
       }
     }

@@ -17,7 +17,9 @@ export class DockerSocketProxy {
     this.#server = http
       .createServer(this.#onRequestWrapper.bind(this))
       .listen(this.listenPath);
-    fs.chmodSync(this.listenPath, "777");
+
+    if (Number.isNaN(parseInt(this.listenPath)))
+      fs.chmodSync(this.listenPath, "777");
 
     this.#server.on("upgrade", (req, socket, head) => {
       console.log(`[UPGRADE REQUEST] ${req.url} - denied`);
