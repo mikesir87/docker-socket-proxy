@@ -69,7 +69,7 @@ describe("RemapImageMiddleware", () => {
       });
 
       const body = {
-        Image: "nginx"
+        Image: "nginx",
       };
 
       middleware.run({}, new URL("http://localhost/containers/create"), body);
@@ -84,7 +84,7 @@ describe("RemapImageMiddleware", () => {
       });
 
       const body = {
-        Image: "nginx:2.0"
+        Image: "nginx:2.0",
       };
 
       middleware.run({}, new URL("http://localhost/containers/create"), body);
@@ -99,7 +99,7 @@ describe("RemapImageMiddleware", () => {
       });
 
       const body = {
-        Image: "nginx"
+        Image: "nginx",
       };
 
       middleware.run({}, new URL("http://localhost/containers/create"), body);
@@ -114,7 +114,7 @@ describe("RemapImageMiddleware", () => {
       });
 
       const body = {
-        Image: "nginx"
+        Image: "nginx",
       };
 
       middleware.run({}, new URL("http://localhost/containers/create"), body);
@@ -129,7 +129,7 @@ describe("RemapImageMiddleware", () => {
       });
 
       const body = {
-        Image: "gcr.io/test/nginx"
+        Image: "gcr.io/test/nginx",
       };
 
       middleware.run({}, new URL("http://localhost/containers/create"), body);
@@ -144,7 +144,7 @@ describe("RemapImageMiddleware", () => {
       });
 
       const body = {
-        Image: "nginx"
+        Image: "nginx",
       };
 
       middleware.run({}, new URL("http://localhost/containers/create"), body);
@@ -159,7 +159,7 @@ describe("RemapImageMiddleware", () => {
       });
 
       const body = {
-        Image: "nginx:latest"
+        Image: "nginx:latest",
       };
 
       middleware.run({}, new URL("http://localhost/containers/create"), body);
@@ -167,5 +167,4 @@ describe("RemapImageMiddleware", () => {
       expect(body.Image).toEqual("nginx:alpine");
     });
   });
-
 });
