@@ -85,6 +85,7 @@ export class DockerSocketProxy {
     try {
       this.middlewareChain.applyMiddleware(options, url, body);
     } catch (err) {
+      console.log("ERROR", err);
       const statusCode = err.name === "ValidationError" ? 403 : 500;
       console.log(
         `[${clientReq.method}] ${clientReq.url} - ${statusCode} - ${err.message}`,
@@ -93,6 +94,8 @@ export class DockerSocketProxy {
       clientRes.end(JSON.stringify({ message: err.message }));
       return;
     }
+
+    options.path = url.pathname + url.search;
 
     const bodyString = body ? JSON.stringify(body) : null;
     this.#sendProxyRequest(clientReq, clientRes, options, bodyString);

@@ -7,11 +7,11 @@ mutators:
       com.mikesir87.example: test-value
   - type: remapImage
     from: nginx
-    to: nginx:alpine
+    to: ghcr.io/mikesir87/nginx-mirror
 
 gates:
   - type: registry
-    registries: ["docker.io"]
+    registries: ["docker.io", "ghcr.io"]
   - type: namespaceAllowlist
     namespaces: ["library", "mikesir87"]
   # - type: readonly

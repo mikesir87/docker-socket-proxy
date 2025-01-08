@@ -18,6 +18,7 @@ socketProxy.start();
 
 ["SIGTERM", "SIGINT", "SIGUSR2"].forEach((signal) => {
   process.on(signal, () => {
+    console.log("Received signal", signal);
     socketProxy.stop().then(() => {
       process.exit(0);
     });
