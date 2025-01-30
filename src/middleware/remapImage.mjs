@@ -1,5 +1,7 @@
 import { parseFamiliarName } from "@swimlane/docker-reference";
 
+const URL_MATCHER = /images\/(.*)\/json/;
+
 export class RemapImageMiddleware {
   constructor(config) {
     if (!config.from) {
@@ -29,16 +31,26 @@ export class RemapImageMiddleware {
   }
 
   applies(method, url) {
-    return method === "POST" && (url.pathname.endsWith("/containers/create") || url.pathname.endsWith("/images/create"));
+    if (method === "POST")
+      return url.pathname.endsWith("/containers/create") || url.pathname.endsWith("/images/create");
+
+    if (method === "GET")
+      return url.pathname.match(URL_MATCHER) !== null;
+    
+    return false;
   }
 
   run(requestOptions, url, body) {
-    if (url.pathname.endsWith("/containers/create")) {
-      this.#evaluateContainerCreate(body);
-    }
+    if (requestOptions.method === "POST") {
+      if (url.pathname.endsWith("/containers/create")) {
+        this.#evaluateContainerCreate(body);
+      }
 
-    if (url.pathname.endsWith("/images/create")) {
-      this.#evaluateImageCreate(url);
+      if (url.pathname.endsWith("/images/create")) {
+        this.#evaluateImageCreate(url);
+      }
+    } else if (requestOptions.method === "GET") {
+      this.#evaluateImageInspect(url);
     }
   }
 
@@ -61,6 +73,16 @@ export class RemapImageMiddleware {
     if (this.#isMatch(requestedImage, requestedTag, this.parsedFrom, this.fromTag)) {
       url.searchParams.set("fromImage", this.toImage);
       url.searchParams.set("tag", this.toTag);
+    }
+  }
+
+  #evaluateImageInspect(url) {
+    const requestedImageString = url.pathname.match(URL_MATCHER)[1];
+    const requestedImage = parseFamiliarName(requestedImageString);
+    const requestedTag = requestedImage.tag || "latest";
+
+    if (this.#isMatch(requestedImage, requestedTag, this.parsedFrom, this.fromTag)) {
+      url.pathname = url.pathname.replace(requestedImageString, `${this.toImage}:${this.toTag}`);
     }
   }
 

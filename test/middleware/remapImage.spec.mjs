@@ -47,6 +47,7 @@ describe("RemapImageMiddleware", () => {
   });
 
   describe("run for container creation", () => {
+    const requestOptions = { method: "POST" };
     const url = new URL("http://localhost/containers/create");
 
     it("doesn't do anything if repositories are different", () => {
@@ -59,7 +60,7 @@ describe("RemapImageMiddleware", () => {
         Image: "ubuntu",
       };
 
-      middleware.run({}, url, body);
+      middleware.run(requestOptions, url, body);
 
       expect(body.Image).toEqual("ubuntu");
     });
@@ -74,7 +75,7 @@ describe("RemapImageMiddleware", () => {
         Image: "nginx",
       };
 
-      middleware.run({}, url, body);
+      middleware.run(requestOptions, url, body);
 
       expect(body.Image).toEqual("nginx:alpine");
     });
@@ -89,7 +90,7 @@ describe("RemapImageMiddleware", () => {
         Image: "nginx:2.0",
       };
 
-      middleware.run({}, url, body);
+      middleware.run(requestOptions, url, body);
 
       expect(body.Image).toEqual("nginx:2.0");
     });
@@ -104,7 +105,7 @@ describe("RemapImageMiddleware", () => {
         Image: "nginx",
       };
 
-      middleware.run({}, url, body);
+      middleware.run(requestOptions, url, body);
 
       expect(body.Image).toEqual("nginx");
     });
@@ -119,7 +120,7 @@ describe("RemapImageMiddleware", () => {
         Image: "nginx",
       };
 
-      middleware.run({}, url, body);
+      middleware.run(requestOptions, url, body);
 
       expect(body.Image).toEqual("nginx");
     });
@@ -134,7 +135,7 @@ describe("RemapImageMiddleware", () => {
         Image: "gcr.io/test/nginx",
       };
 
-      middleware.run({}, url, body);
+      middleware.run(requestOptions, url, body);
 
       expect(body.Image).toEqual("nginx:alpine");
     });
@@ -149,7 +150,7 @@ describe("RemapImageMiddleware", () => {
         Image: "nginx",
       };
 
-      middleware.run({}, url, body);
+      middleware.run(requestOptions, url, body);
 
       expect(body.Image).toEqual("nginx:alpine");
     });
@@ -164,7 +165,7 @@ describe("RemapImageMiddleware", () => {
         Image: "nginx:latest",
       };
 
-      middleware.run({}, url, body);
+      middleware.run(requestOptions, url, body);
 
       expect(body.Image).toEqual("nginx:alpine");
     });
@@ -172,6 +173,7 @@ describe("RemapImageMiddleware", () => {
 
   describe("run for image creation", () => {
     let url;
+    const requestOptions = { method: "POST" };
 
     beforeEach(() => {
       url = new URL("http://localhost/images/create");
@@ -186,7 +188,7 @@ describe("RemapImageMiddleware", () => {
         to: "nginx:alpine",
       });
 
-      middleware.run({}, url, {});
+      middleware.run(requestOptions, url, {});
 
       expect(url.searchParams.get("fromImage")).toEqual("ubuntu");
       expect(url.searchParams.get("tag")).toEqual("latest");
@@ -201,7 +203,7 @@ describe("RemapImageMiddleware", () => {
         to: "nginx:alpine",
       });
 
-      middleware.run({}, url, {});
+      middleware.run(requestOptions, url, {});
 
       expect(url.searchParams.get("fromImage")).toEqual("nginx");
       expect(url.searchParams.get("tag")).toEqual("alpine");
@@ -216,7 +218,7 @@ describe("RemapImageMiddleware", () => {
         to: "nginx:alpine",
       });
 
-      middleware.run({}, url, {});
+      middleware.run(requestOptions, url, {});
 
       expect(url.searchParams.get("fromImage")).toEqual("nginx");
       expect(url.searchParams.get("tag")).toEqual("2.0");
@@ -231,7 +233,7 @@ describe("RemapImageMiddleware", () => {
         to: "nginx:alpine",
       });
 
-      middleware.run({}, url, {});
+      middleware.run(requestOptions, url, {});
 
       expect(url.searchParams.get("fromImage")).toEqual("nginx");
       expect(url.searchParams.get("tag")).toEqual("latest");
@@ -246,7 +248,7 @@ describe("RemapImageMiddleware", () => {
         to: "nginx:alpine",
       });
 
-      middleware.run({}, url, {});
+      middleware.run(requestOptions, url, {});
 
       expect(url.searchParams.get("fromImage")).toEqual("nginx");
       expect(url.searchParams.get("tag")).toEqual("latest");
@@ -261,10 +263,93 @@ describe("RemapImageMiddleware", () => {
         to: "nginx:alpine",
       });
 
-      middleware.run({}, url, {});
+      middleware.run(requestOptions, url, {});
 
       expect(url.searchParams.get("fromImage")).toEqual("nginx");
       expect(url.searchParams.get("tag")).toEqual("alpine");
+    });
+  });
+
+  describe("run for image inspection", () => {
+    let url;
+    const requestOptions = { method: "GET" };
+
+    it("doesn't do anything if repositories are different", () => {
+      const url = new URL("http://localhost/images/ubuntu:latest/json");
+
+      const middleware = new RemapImageMiddleware({
+        from: "nginx",
+        to: "nginx:alpine",
+      });
+
+      middleware.run(requestOptions, url, {});
+
+      expect(url.pathname).toContain("ubuntu:latest");
+    });
+
+    it("remaps when exact matches occur", () => {
+      const url = new URL("http://localhost/images/nginx:latest/json");
+
+      const middleware = new RemapImageMiddleware({
+        from: "nginx:latest",
+        to: "nginx:alpine",
+      });
+
+      middleware.run(requestOptions, url, {});
+
+      expect(url.pathname).toContain("nginx:alpine");
+    });
+
+    it("doesn't rewrite tags don't match", () => {
+      const url = new URL("http://localhost/images/nginx:2.0/json");
+
+      const middleware = new RemapImageMiddleware({
+        from: "nginx",
+        to: "nginx:alpine",
+      });
+
+      middleware.run(requestOptions, url, {});
+
+      expect(url.pathname).toContain("nginx:2.0");
+    });
+
+    it("doesn't rewrite when config-specified tag doesn't match", () => {
+      const url = new URL("http://localhost/images/nginx:latest/json");
+
+      const middleware = new RemapImageMiddleware({
+        from: "nginx:2.0",
+        to: "nginx:alpine",
+      });
+
+      middleware.run(requestOptions, url, {});
+
+      expect(url.pathname).toContain("nginx:latest");
+    });
+
+    it("doesn't rewrite when registries don't match", () => {
+      const url = new URL("http://localhost/images/nginx:latest/json");
+
+      const middleware = new RemapImageMiddleware({
+        from: "gcr.io/test/nginx:2.0",
+        to: "nginx:alpine",
+      });
+
+      middleware.run(requestOptions, url, {});
+
+      expect(url.pathname).toContain("nginx:latest");
+    });
+
+    it("does rewrite when registries match", () => {
+      const url = new URL("http://localhost/images/ghcr.io/test/nginx:latest/json");
+
+      const middleware = new RemapImageMiddleware({
+        from: "gcr.io/test/nginx",
+        to: "nginx:alpine",
+      });
+
+      middleware.run(requestOptions, url, {});
+
+      expect(url.pathname).toContain("nginx:alpine");
     });
   });
 });
