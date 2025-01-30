@@ -340,7 +340,9 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("does rewrite when registries match", () => {
-      const url = new URL("http://localhost/images/ghcr.io/test/nginx:latest/json");
+      const url = new URL(
+        "http://localhost/images/ghcr.io/test/nginx:latest/json",
+      );
 
       const middleware = new RemapImageMiddleware({
         from: "gcr.io/test/nginx",

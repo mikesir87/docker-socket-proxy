@@ -32,11 +32,13 @@ export class RemapImageMiddleware {
 
   applies(method, url) {
     if (method === "POST")
-      return url.pathname.endsWith("/containers/create") || url.pathname.endsWith("/images/create");
+      return (
+        url.pathname.endsWith("/containers/create") ||
+        url.pathname.endsWith("/images/create")
+      );
 
-    if (method === "GET")
-      return url.pathname.match(URL_MATCHER) !== null;
-    
+    if (method === "GET") return url.pathname.match(URL_MATCHER) !== null;
+
     return false;
   }
 
@@ -58,7 +60,9 @@ export class RemapImageMiddleware {
     const requestedImage = parseFamiliarName(body.Image);
     const requestedTag = requestedImage.tag || "latest";
 
-    if (this.#isMatch(requestedImage, requestedTag, this.parsedFrom, this.fromTag)) {
+    if (
+      this.#isMatch(requestedImage, requestedTag, this.parsedFrom, this.fromTag)
+    ) {
       body.Image = `${this.toImage}:${this.toTag}`;
     }
   }
@@ -70,7 +74,9 @@ export class RemapImageMiddleware {
     const requestedImage = parseFamiliarName(requestedImageString);
     const requestedTag = requestedImage.tag || "latest";
 
-    if (this.#isMatch(requestedImage, requestedTag, this.parsedFrom, this.fromTag)) {
+    if (
+      this.#isMatch(requestedImage, requestedTag, this.parsedFrom, this.fromTag)
+    ) {
       url.searchParams.set("fromImage", this.toImage);
       url.searchParams.set("tag", this.toTag);
     }
@@ -81,12 +87,22 @@ export class RemapImageMiddleware {
     const requestedImage = parseFamiliarName(requestedImageString);
     const requestedTag = requestedImage.tag || "latest";
 
-    if (this.#isMatch(requestedImage, requestedTag, this.parsedFrom, this.fromTag)) {
-      url.pathname = url.pathname.replace(requestedImageString, `${this.toImage}:${this.toTag}`);
+    if (
+      this.#isMatch(requestedImage, requestedTag, this.parsedFrom, this.fromTag)
+    ) {
+      url.pathname = url.pathname.replace(
+        requestedImageString,
+        `${this.toImage}:${this.toTag}`,
+      );
     }
   }
 
-  #isMatch(requestedImage, requestedImageTag, configuredImage, configuredImageTag) {
+  #isMatch(
+    requestedImage,
+    requestedImageTag,
+    configuredImage,
+    configuredImageTag,
+  ) {
     if (requestedImage.registry !== configuredImage.registry) {
       return false;
     }

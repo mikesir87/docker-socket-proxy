@@ -2,21 +2,27 @@ import http from "http";
 import net from "net";
 import fs from "fs";
 
-var createHttpHeader = function(line, headers) {
-  return Object.keys(headers).reduce(function (head, key) {
-    var value = headers[key];
+var createHttpHeader = function (line, headers) {
+  return (
+    Object.keys(headers)
+      .reduce(
+        function (head, key) {
+          var value = headers[key];
 
-    if (!Array.isArray(value)) {
-      head.push(key + ': ' + value);
-      return head;
-    }
+          if (!Array.isArray(value)) {
+            head.push(key + ": " + value);
+            return head;
+          }
 
-    for (var i = 0; i < value.length; i++) {
-      head.push(key + ': ' + value[i]);
-    }
-    return head;
-  }, [line])
-  .join('\r\n') + '\r\n\r\n';
+          for (var i = 0; i < value.length; i++) {
+            head.push(key + ": " + value[i]);
+          }
+          return head;
+        },
+        [line],
+      )
+      .join("\r\n") + "\r\n\r\n"
+  );
 };
 
 export class DockerSocketProxy {
@@ -47,11 +53,11 @@ export class DockerSocketProxy {
 
   /**
    * Handle upgrade requests. Code inspired from the node-http-proxy library.
-   * 
-   * @param {http.IncomingMessage} req 
-   * @param {net.Socket} socket 
-   * @param {Buffer} reqBody 
-   * @returns 
+   *
+   * @param {http.IncomingMessage} req
+   * @param {net.Socket} socket
+   * @param {Buffer} reqBody
+   * @returns
    */
   async #onUpgradeRequest(req, socket, reqBody) {
     if (req.headers["upgrade"] !== "tcp") {
@@ -75,24 +81,33 @@ export class DockerSocketProxy {
 
     const proxyReq = http.request(rightRequestOptions);
 
-    if (reqBody)
-      proxyReq.write(reqBody);
+    if (reqBody) proxyReq.write(reqBody);
 
-    proxyReq.on('error', (err) => {
+    proxyReq.on("error", (err) => {
       console.error("Error while proxying upgrade request", err);
       socket.end();
     });
 
-    proxyReq.on('response', function (res) {
+    proxyReq.on("response", function (res) {
       // if upgrade event isn't going to happen, close the socket
       if (!res.upgrade) {
-        socket.write(createHttpHeader('HTTP/' + res.httpVersion + ' ' + res.statusCode + ' ' + res.statusMessage, res.headers));
+        socket.write(
+          createHttpHeader(
+            "HTTP/" +
+              res.httpVersion +
+              " " +
+              res.statusCode +
+              " " +
+              res.statusMessage,
+            res.headers,
+          ),
+        );
         res.pipe(socket);
       }
     });
 
-    proxyReq.on('upgrade', function(proxyRes, proxySocket, proxyHead) {
-      proxySocket.on('error', (err) => {
+    proxyReq.on("upgrade", function (proxyRes, proxySocket, proxyHead) {
+      proxySocket.on("error", (err) => {
         console.error("Proxy socket error", err);
         socket.end();
       });
@@ -100,13 +115,15 @@ export class DockerSocketProxy {
       // The pipe below will end proxySocket if socket closes cleanly, but not
       // if it errors (eg, vanishes from the net and starts returning
       // EHOSTUNREACH). We need to do that explicitly.
-      socket.on('error', function () {
+      socket.on("error", function () {
         proxySocket.end();
       });
 
       if (proxyHead && proxyHead.length) proxySocket.unshift(proxyHead);
 
-      socket.write(createHttpHeader('HTTP/1.1 101 Switching Protocols', proxyRes.headers));
+      socket.write(
+        createHttpHeader("HTTP/1.1 101 Switching Protocols", proxyRes.headers),
+      );
 
       proxySocket.pipe(socket).pipe(proxySocket);
     });
