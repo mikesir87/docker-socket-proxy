@@ -17,7 +17,7 @@ export class RegistryBlockerMiddleware {
   run(requestOptions, url, body) {
     const requestedImage =
       url.searchParams.get("fromImage") + ":" + url.searchParams.get("tag");
-console.log("IMAGE", requestedImage);
+
     const { domain } = parseFamiliarName(requestedImage);
     if (!this.registries.includes(domain)) {
       throw new ValidationError(`Access to registry ${domain} is forbidden`);
