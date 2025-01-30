@@ -26,12 +26,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: npm
 
       - name: Install dependencies
-        run: yarn install
+        run: npm install
 
       - name: Run Prettier
-        run: yarn run prettier-check
+        run: npm run prettier-check
 
   unit-test:
     name: "Run tests"
@@ -45,13 +46,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: yarn
+          cache: npm
 
       - name: Install dependencies
-        run: yarn install
+        run: npm install
 
       - name: Run unit tests
-        run: yarn test
+        run: npm test
   
   build:
     name: Build and push image
