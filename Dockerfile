@@ -1,8 +1,8 @@
 FROM node:lts-slim
 WORKDIR /usr/local/app
-COPY package.json yarn.lock ./
+COPY package.json package-lock.json ./
 ENV NODE_ENV=production
-RUN yarn install && yarn cache clean
+RUN npm ci --production --ignore-scripts && npm cache clean --force
 COPY src ./src
 CMD ["node", "src/index.mjs"]
 EXPOSE 3000
