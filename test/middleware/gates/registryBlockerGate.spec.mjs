@@ -1,16 +1,16 @@
-import { RegistryBlockerMiddleware } from "../../src/middleware/registryBlocker.mjs";
+import { RegistryBlockerGate } from "../../../src/middleware/gates/registryBlockerGate.mjs";
 
-describe("RegistryBlocker", () => {
+describe("RegistryBlockerGate", () => {
   let middleware;
 
   beforeAll(() => {
-    middleware = new RegistryBlockerMiddleware({
+    middleware = new RegistryBlockerGate({
       registries: ["docker.io"],
     });
   });
 
   it("requires a registries config", () => {
-    expect(() => new RegistryBlockerMiddleware({})).toThrow(
+    expect(() => new RegistryBlockerGate({})).toThrow(
       "Missing 'registries' in config",
     );
   });

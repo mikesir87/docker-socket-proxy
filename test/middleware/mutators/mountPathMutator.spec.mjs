@@ -1,5 +1,5 @@
 import { URL } from "url";
-import { MountPathMutator } from "../../src/middleware/mountPathMutator.mjs";
+import { MountPathMutator } from "../../../src/middleware/mutators/mountPathMutator.mjs";
 
 describe("MountPathMutator", () => {
   let middleware;

@@ -1,7 +1,7 @@
 import { parseFamiliarName } from "@swimlane/docker-reference";
-import { ValidationError } from "./validationError.mjs";
+import { ValidationError } from "../validationError.mjs";
 
-export class NamespaceAllowListMiddleware {
+export class NamespaceAllowListGate {
   constructor(config) {
     if (!config.namespaces) {
       throw new Error("Missing 'namespaces' in config");
@@ -30,6 +30,6 @@ export class NamespaceAllowListMiddleware {
   }
 
   toString() {
-    return `NamespaceAllowListMiddleware - ${this.namespaces.join(",")}`;
+    return `NamespaceAllowListGate - ${this.namespaces.join(",")}`;
   }
 }

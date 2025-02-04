@@ -1,6 +1,6 @@
-import { ValidationError } from "./validationError.mjs";
+import { ValidationError } from "../validationError.mjs";
 
-export class ReadonlyAccessMiddleware {
+export class ReadonlyAccessGate {
   constructor(config) {
     this.allowed = config.allowed ? config.allowed : [];
   }
@@ -14,6 +14,6 @@ export class ReadonlyAccessMiddleware {
   }
 
   toString() {
-    return `ReadonlyAccessMiddleware - allowed: ${JSON.stringify(this.allowed)}`;
+    return `ReadonlyAccessGate - allowed: ${JSON.stringify(this.allowed)}`;
   }
 }

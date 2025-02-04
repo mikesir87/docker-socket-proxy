@@ -1,16 +1,16 @@
-import { NamespaceAllowListMiddleware } from "../../src/middleware/namespaceAllowlist.mjs";
+import { NamespaceAllowListGate } from "../../../src/middleware/gates/NamespaceAllowListGate.mjs";
 
-describe("NamespaceAllowListMiddleware", () => {
+describe("NamespaceAllowListGate", () => {
   let middleware;
 
   beforeAll(() => {
-    middleware = new NamespaceAllowListMiddleware({
+    middleware = new NamespaceAllowListGate({
       namespaces: ["library", "test"],
     });
   });
 
   it("requires a namespaces config", () => {
-    expect(() => new NamespaceAllowListMiddleware({})).toThrow(
+    expect(() => new NamespaceAllowListGate({})).toThrow(
       "Missing 'namespaces' in config",
     );
   });

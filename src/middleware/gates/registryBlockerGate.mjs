@@ -1,7 +1,7 @@
 import { parseFamiliarName } from "@swimlane/docker-reference";
-import { ValidationError } from "./validationError.mjs";
+import { ValidationError } from "../validationError.mjs";
 
-export class RegistryBlockerMiddleware {
+export class RegistryBlockerGate {
   constructor(config) {
     if (!config.registries) {
       throw new Error("Missing 'registries' in config");
@@ -25,6 +25,6 @@ export class RegistryBlockerMiddleware {
   }
 
   toString() {
-    return `RegistryBlockerMiddleware - ${this.registries}`;
+    return `RegistryBlockerGate - ${this.registries}`;
   }
 }

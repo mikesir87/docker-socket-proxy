@@ -1,9 +1,9 @@
-import { AddLabelsMiddleware } from "./middleware/addLabels.mjs";
-import { NamespaceAllowListMiddleware } from "./middleware/namespaceAllowlist.mjs";
-import { ReadonlyAccessMiddleware } from "./middleware/readonlyAccess.mjs";
-import { RegistryBlockerMiddleware } from "./middleware/registryBlocker.mjs";
-import { MountPathMutator } from "./middleware/mountPathMutator.mjs";
-import { RemapImageMiddleware } from "./middleware/remapImage.mjs";
+import { AddLabelsMutator } from "./middleware/mutators/addLabelsMutator.mjs";
+import { NamespaceAllowListGate } from "./middleware/gates/namespaceAllowlistGate.mjs";
+import { ReadonlyAccessGate } from "./middleware/gates/readonlyAccessGate.mjs";
+import { RegistryBlockerGate } from "./middleware/gates/registryBlockerGate.mjs";
+import { MountPathMutator } from "./middleware/mutators/mountPathMutator.mjs";
+import { RemapImageMutator } from "./middleware/mutators/remapImageMutator.mjs";
 
 export class MiddlewareChain {
   constructor(config) {
@@ -16,10 +16,10 @@ export class MiddlewareChain {
           mutators.push(new MountPathMutator(rewrite));
           break;
         case "addLabels":
-          mutators.push(new AddLabelsMiddleware(rewrite));
+          mutators.push(new AddLabelsMutator(rewrite));
           break;
         case "remapImage":
-          mutators.push(new RemapImageMiddleware(rewrite));
+          mutators.push(new RemapImageMutator(rewrite));
           break;
       }
     }
@@ -27,13 +27,13 @@ export class MiddlewareChain {
     for (let gate of config.gates) {
       switch (gate.type) {
         case "registry":
-          gates.push(new RegistryBlockerMiddleware(gate));
+          gates.push(new RegistryBlockerGate(gate));
           break;
         case "readonly":
-          gates.push(new ReadonlyAccessMiddleware(gate));
+          gates.push(new ReadonlyAccessGate(gate));
           break;
         case "namespaceAllowlist":
-          gates.push(new NamespaceAllowListMiddleware(gate));
+          gates.push(new NamespaceAllowListGate(gate));
           break;
       }
     }

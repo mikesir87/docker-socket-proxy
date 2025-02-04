@@ -2,7 +2,7 @@ import { parseFamiliarName } from "@swimlane/docker-reference";
 
 const URL_MATCHER = /images\/(.*)\/json/;
 
-export class RemapImageMiddleware {
+export class RemapImageMutator {
   constructor(config) {
     if (!config.from) {
       throw new Error("Missing 'from' in config");
@@ -115,6 +115,6 @@ export class RemapImageMiddleware {
   }
 
   toString() {
-    return `RemapImage - rewriting image ${this.from} to ${this.to}`;
+    return `RemapImageMutator - rewriting image ${this.from} to ${this.to}`;
   }
 }

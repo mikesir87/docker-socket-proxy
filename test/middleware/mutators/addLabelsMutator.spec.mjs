@@ -1,10 +1,10 @@
-import { AddLabelsMiddleware } from "../../src/middleware/addLabels.mjs";
+import { AddLabelsMutator } from "../../../src/middleware/mutators/addLabelsMutator.mjs";
 
-describe("AddLabelsMiddleware", () => {
+describe("AddLabelsMutator", () => {
   let middleware;
 
   beforeAll(() => {
-    middleware = new AddLabelsMiddleware({
+    middleware = new AddLabelsMutator({
       labels: {
         "com.example.label": "example",
         "com.example.label2": "example2",
@@ -13,7 +13,7 @@ describe("AddLabelsMiddleware", () => {
   });
 
   it("requires a labels config", () => {
-    expect(() => new AddLabelsMiddleware({})).toThrow(
+    expect(() => new AddLabelsMutator({})).toThrow(
       "Missing 'labels' in config",
     );
   });

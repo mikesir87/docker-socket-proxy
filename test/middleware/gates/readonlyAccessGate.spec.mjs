@@ -1,10 +1,10 @@
-import { ReadonlyAccessMiddleware } from "../../src/middleware/readonlyAccess.mjs";
+import { ReadonlyAccessGate } from "../../../src/middleware/gates/readonlyAccessGate.mjs";
 
-describe("ReadonlyAccess", () => {
+describe("ReadonlyAccessGate", () => {
   let middleware;
 
   beforeAll(() => {
-    middleware = new ReadonlyAccessMiddleware({});
+    middleware = new ReadonlyAccessGate({});
   });
 
   describe("applies", () => {

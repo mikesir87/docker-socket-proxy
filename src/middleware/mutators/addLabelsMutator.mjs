@@ -5,7 +5,7 @@ const PATHS = [
   ["/volumes/create", "Labels"],
 ];
 
-export class AddLabelsMiddleware {
+export class AddLabelsMutator {
   constructor(config) {
     if (!config.labels) {
       throw new Error("Missing 'labels' in config");
@@ -34,6 +34,6 @@ export class AddLabelsMiddleware {
   }
 
   toString() {
-    return `AddLabelsMiddleware - ${JSON.stringify(this.labels)}`;
+    return `AddLabelsMutator - ${JSON.stringify(this.labels)}`;
   }
 }

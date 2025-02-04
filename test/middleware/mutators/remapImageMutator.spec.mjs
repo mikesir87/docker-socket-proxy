@@ -1,16 +1,16 @@
 import { URL } from "url";
-import { RemapImageMiddleware } from "../../src/middleware/remapImage.mjs";
+import { RemapImageMutator } from "../../../src/middleware/mutators/remapImageMutator.mjs";
 
-describe("RemapImageMiddleware", () => {
+describe("RemapImageMutator", () => {
   describe("constructor", () => {
     it("requires a from setting", () => {
-      expect(() => new RemapImageMiddleware({ to: "test" })).toThrow(
+      expect(() => new RemapImageMutator({ to: "test" })).toThrow(
         "Missing 'from' in config",
       );
     });
 
     it("requires a to setting", () => {
-      expect(() => new RemapImageMiddleware({ from: "test" })).toThrow(
+      expect(() => new RemapImageMutator({ from: "test" })).toThrow(
         "Missing 'to' in config",
       );
     });
@@ -18,7 +18,7 @@ describe("RemapImageMiddleware", () => {
 
   describe("applies", () => {
     it("applies to POST /containers/create", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -32,7 +32,7 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("does not apply to GET /containers/create", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -51,7 +51,7 @@ describe("RemapImageMiddleware", () => {
     const url = new URL("http://localhost/containers/create");
 
     it("doesn't do anything if repositories are different", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -66,7 +66,7 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("remaps when exact matches occur", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -81,7 +81,7 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("doesn't rewrite when a more specific tag is requested", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -96,7 +96,7 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("doesn't rewrite when a more specific tag is used in config", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx:2.0",
         to: "nginx:alpine",
       });
@@ -111,7 +111,7 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("doesn't rewrite when registries don't match", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "gcr.io/test/nginx:2.0",
         to: "nginx:alpine",
       });
@@ -126,7 +126,7 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("does rewrite when registries match", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "gcr.io/test/nginx",
         to: "nginx:alpine",
       });
@@ -141,7 +141,7 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("rewrites when latest is on the from, but not requested", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx:latest",
         to: "nginx:alpine",
       });
@@ -156,7 +156,7 @@ describe("RemapImageMiddleware", () => {
     });
 
     it("rewrites when latest is on the requested, but not from config", () => {
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -183,7 +183,7 @@ describe("RemapImageMiddleware", () => {
       url.searchParams.set("fromImage", "ubuntu");
       url.searchParams.set("tag", "latest");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -198,7 +198,7 @@ describe("RemapImageMiddleware", () => {
       url.searchParams.set("fromImage", "nginx");
       url.searchParams.set("tag", "latest");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx:latest",
         to: "nginx:alpine",
       });
@@ -213,7 +213,7 @@ describe("RemapImageMiddleware", () => {
       url.searchParams.set("fromImage", "nginx");
       url.searchParams.set("tag", "2.0");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -228,7 +228,7 @@ describe("RemapImageMiddleware", () => {
       url.searchParams.set("fromImage", "nginx");
       url.searchParams.set("tag", "latest");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx:2.0",
         to: "nginx:alpine",
       });
@@ -243,7 +243,7 @@ describe("RemapImageMiddleware", () => {
       url.searchParams.set("fromImage", "nginx");
       url.searchParams.set("tag", "latest");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "gcr.io/test/nginx:2.0",
         to: "nginx:alpine",
       });
@@ -258,7 +258,7 @@ describe("RemapImageMiddleware", () => {
       url.searchParams.set("fromImage", "gcr.io/test/nginx");
       url.searchParams.set("tag", "latest");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "gcr.io/test/nginx",
         to: "nginx:alpine",
       });
@@ -277,7 +277,7 @@ describe("RemapImageMiddleware", () => {
     it("doesn't do anything if repositories are different", () => {
       const url = new URL("http://localhost/images/ubuntu:latest/json");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -290,7 +290,7 @@ describe("RemapImageMiddleware", () => {
     it("remaps when exact matches occur", () => {
       const url = new URL("http://localhost/images/nginx:latest/json");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx:latest",
         to: "nginx:alpine",
       });
@@ -303,7 +303,7 @@ describe("RemapImageMiddleware", () => {
     it("doesn't rewrite tags don't match", () => {
       const url = new URL("http://localhost/images/nginx:2.0/json");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx",
         to: "nginx:alpine",
       });
@@ -316,7 +316,7 @@ describe("RemapImageMiddleware", () => {
     it("doesn't rewrite when config-specified tag doesn't match", () => {
       const url = new URL("http://localhost/images/nginx:latest/json");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "nginx:2.0",
         to: "nginx:alpine",
       });
@@ -329,7 +329,7 @@ describe("RemapImageMiddleware", () => {
     it("doesn't rewrite when registries don't match", () => {
       const url = new URL("http://localhost/images/nginx:latest/json");
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "gcr.io/test/nginx:2.0",
         to: "nginx:alpine",
       });
@@ -344,7 +344,7 @@ describe("RemapImageMiddleware", () => {
         "http://localhost/images/ghcr.io/test/nginx:latest/json",
       );
 
-      const middleware = new RemapImageMiddleware({
+      const middleware = new RemapImageMutator({
         from: "gcr.io/test/nginx",
         to: "nginx:alpine",
       });
