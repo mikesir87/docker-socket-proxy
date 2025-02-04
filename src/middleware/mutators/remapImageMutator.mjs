@@ -118,3 +118,8 @@ export class RemapImageMutator {
     return `RemapImageMutator - rewriting image ${this.from} to ${this.to}`;
   }
 }
+
+export default {
+  key: "remapImage",
+  class: RemapImageMutator,
+};

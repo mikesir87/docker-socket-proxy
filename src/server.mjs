@@ -1,6 +1,7 @@
 import http from "http";
 import net from "net";
 import fs from "fs";
+import { MiddlewareChainFactory } from "./chainFactory.mjs";
 
 var createHttpHeader = function (line, headers) {
   return (
@@ -28,10 +29,16 @@ var createHttpHeader = function (line, headers) {
 export class DockerSocketProxy {
   #server;
 
-  constructor(listenPath, forwardPath, middlewareChain) {
+  /**
+   *
+   * @param {string} listenPath The path this proxy should listen on
+   * @param {string} forwardPath The path this proxy should forward requests to
+   * @param {MiddlewareChainFactory} middlewareChainFactory
+   */
+  constructor(listenPath, forwardPath, middlewareChainFactory) {
     this.listenPath = listenPath;
     this.forwardPath = forwardPath;
-    this.middlewareChain = middlewareChain;
+    this.middlewareChainFactory = middlewareChainFactory;
   }
 
   /**
@@ -174,8 +181,13 @@ export class DockerSocketProxy {
 
     const url = new URL(`http://localhost${clientReq.url}`);
 
+    const middlewareChain = this.middlewareChainFactory.createChainForRequest(
+      clientReq.method,
+      url,
+    );
+
     // Bail early without reading the body if needed
-    if (!this.middlewareChain.hasApplyingMiddleware(clientReq.method, url)) {
+    if (!middlewareChain.hasMiddleware()) {
       this.#sendProxyRequest(clientReq, clientRes, options);
       return;
     }
@@ -183,7 +195,8 @@ export class DockerSocketProxy {
     const body = await this.#readRequestData(clientReq);
 
     try {
-      this.middlewareChain.applyMiddleware(options, url, body);
+      middlewareChain.applyMutators(options, url, body);
+      middlewareChain.applyGates(options, url, body);
     } catch (err) {
       console.log("ERROR", err);
       const statusCode = err.name === "ValidationError" ? 403 : 500;

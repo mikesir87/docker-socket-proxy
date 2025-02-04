@@ -34,6 +34,11 @@ export class AddLabelsMutator {
   }
 
   toString() {
-    return `AddLabelsMutator - ${JSON.stringify(this.labels)}`;
+    return `AddLabelsMutator - adding the following labels to all new objects: ${JSON.stringify(this.labels)}`;
   }
 }
+
+export default {
+  key: "addLabels",
+  class: AddLabelsMutator,
+};

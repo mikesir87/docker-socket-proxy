@@ -19,12 +19,19 @@ export class RegistryBlockerGate {
       url.searchParams.get("fromImage") + ":" + url.searchParams.get("tag");
 
     const { domain } = parseFamiliarName(requestedImage);
+    console.log("Checking domain", domain, this.registries);
+
     if (!this.registries.includes(domain)) {
       throw new ValidationError(`Access to registry ${domain} is forbidden`);
     }
   }
 
   toString() {
-    return `RegistryBlockerGate - ${this.registries}`;
+    return `RegistryBlockerGate - allowing only images pulled from: ${this.registries.join(", ")}`;
   }
 }
+
+export default {
+  key: "registry",
+  class: RegistryBlockerGate,
+};

@@ -30,6 +30,11 @@ export class NamespaceAllowListGate {
   }
 
   toString() {
-    return `NamespaceAllowListGate - ${this.namespaces.join(",")}`;
+    return `NamespaceAllowListGate - allowing the following namespaces: ${this.namespaces.join(", ")}`;
   }
 }
+
+export default {
+  key: "namespaceAllowlist",
+  class: NamespaceAllowListGate,
+};

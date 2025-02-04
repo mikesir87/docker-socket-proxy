@@ -14,6 +14,11 @@ export class ReadonlyAccessGate {
   }
 
   toString() {
-    return `ReadonlyAccessGate - allowed: ${JSON.stringify(this.allowed)}`;
+    return `ReadonlyAccessGate - enabling read-only access`;
   }
 }
+
+export default {
+  key: "readonlyAccess",
+  class: ReadonlyAccessGate,
+};

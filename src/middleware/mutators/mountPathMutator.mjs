@@ -107,3 +107,8 @@ export class MountPathMutator {
     return `MountPathMutator - rewriting volume paths from ${this.from} to rebase to ${this.to}`;
   }
 }
+
+export default {
+  key: "mountPath",
+  class: MountPathMutator,
+};

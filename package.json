@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@swimlane/docker-reference": "^2.0.1",
+    "glob": "^11.0.1",
     "yaml": "^2.6.1"
   },
   "devDependencies": {
@@ -37,5 +38,6 @@
     "*.{js,jsx,ts,tsx,json,css,scss,md}": [
       "prettier --write"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
 }
