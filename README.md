@@ -131,17 +131,22 @@ gates:
 Note that the namespaces here is everything between the domain and the final repository name in an image name. For example, an image pull for `ghcr.io/mikesir87/demo` would have the namespace of `mikesir87`.
 
 
-### Volume path mutator
+### Mount path mutator
 
 This mutator is helpful when doing Docker-out-of-Docker setups (sharing the Docker socket with a container) or devcontainer environments.
 
-To rewrite volume paths during a container creation, add the following mutator:
+Notably, this will rewrite both volume paths and mount paths and is smart enough to create volume subpath configuration if needed.
+
+To rewrite volume/mount paths during a container creation, add the following mutator:
 
 ```yaml
 mutators:
-  - type: volumePath
+  - type: mountPath
     from: /workspaces/test-repo
     to: /Users/mikesir87/git/test-repo
+  - type: mountPath
+    from: /workspaces/another-test
+    to: workspace-volume
 ```
 
 ### Add label mutator

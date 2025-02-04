@@ -2,7 +2,7 @@ import { AddLabelsMiddleware } from "./middleware/addLabels.mjs";
 import { NamespaceAllowListMiddleware } from "./middleware/namespaceAllowlist.mjs";
 import { ReadonlyAccessMiddleware } from "./middleware/readonlyAccess.mjs";
 import { RegistryBlockerMiddleware } from "./middleware/registryBlocker.mjs";
-import { RewriteVolumePathMiddleware } from "./middleware/rewriteVolumePath.mjs";
+import { MountPathMutator } from "./middleware/mountPathMutator.mjs";
 import { RemapImageMiddleware } from "./middleware/remapImage.mjs";
 
 export class MiddlewareChain {
@@ -12,8 +12,8 @@ export class MiddlewareChain {
 
     for (let rewrite of config.mutators) {
       switch (rewrite.type) {
-        case "volumePath":
-          mutators.push(new RewriteVolumePathMiddleware(rewrite));
+        case "mountPath":
+          mutators.push(new MountPathMutator(rewrite));
           break;
         case "addLabels":
           mutators.push(new AddLabelsMiddleware(rewrite));
