@@ -5,10 +5,12 @@ import { DockerSocketProxy } from "./server.mjs";
 const LISTEN_SOCKET_PATH = Config.getListeningSocketPath();
 const FORWARDING_SOCKET_PATH = Config.getForwardingSocketPath();
 
-const middlewareChainFactory = new MiddlewareChainFactory(
-  Config.getConfigData(),
-);
-middlewareChainFactory.bootstrap().then(() => {
+(async function () {
+  const middlewareChainFactory = new MiddlewareChainFactory(
+    Config.getConfigData(),
+  );
+
+  await middlewareChainFactory.bootstrap();
   console.log("Middleware chain created and configured:");
   console.log(middlewareChainFactory.toString());
 
@@ -17,6 +19,7 @@ middlewareChainFactory.bootstrap().then(() => {
     FORWARDING_SOCKET_PATH,
     middlewareChainFactory,
   );
+
   socketProxy.start();
 
   ["SIGTERM", "SIGINT", "SIGUSR2"].forEach((signal) => {
@@ -27,4 +30,4 @@ middlewareChainFactory.bootstrap().then(() => {
       });
     });
   });
-});
+})();
