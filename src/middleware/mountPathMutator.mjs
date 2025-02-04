@@ -21,15 +21,17 @@ export class MountPathMutator {
     if (body.HostConfig && body.HostConfig.Binds) {
       body.HostConfig.Binds = body.HostConfig.Binds.map((bind) => {
         const [requestedFrom, requestedTo] = bind.split(":");
-        
-        const { from, to, subPath } = this.#resolvePath(requestedFrom, requestedTo);
-        
+
+        const { from, to, subPath } = this.#resolvePath(
+          requestedFrom,
+          requestedTo,
+        );
+
         if (!subPath) {
           return `${from}:${to}`;
         }
 
-        if (!body.HostConfig.Mounts)
-          body.HostConfig.Mounts = [];
+        if (!body.HostConfig.Mounts) body.HostConfig.Mounts = [];
 
         body.HostConfig.Mounts.push({
           Type: "volume",
@@ -46,7 +48,10 @@ export class MountPathMutator {
 
     if (body.HostConfig && body.HostConfig.Mounts) {
       body.HostConfig.Mounts.forEach((mount) => {
-        const { from, to, subPath, isVolume} = this.#resolvePath(mount.Source, mount.Target);
+        const { from, to, subPath, isVolume } = this.#resolvePath(
+          mount.Source,
+          mount.Target,
+        );
 
         mount.Source = from;
         mount.Target = to;
@@ -75,7 +80,11 @@ export class MountPathMutator {
 
       // If the target is an absolute path or a volume with no subpaths, we can directly rewrite
       if (newSource.startsWith("/") || newSource.indexOf("/") === -1) {
-        return { from: newSource, to: requestedTo, isVolume: !newSource.startsWith("/") };
+        return {
+          from: newSource,
+          to: requestedTo,
+          isVolume: !newSource.startsWith("/"),
+        };
       }
 
       const [volumeName, ...subPathNames] = newSource.split("/");
@@ -87,7 +96,11 @@ export class MountPathMutator {
       };
     }
 
-    return { from: requestedFrom, to: requestedTo, isVolume: !requestedFrom.startsWith("/") };
+    return {
+      from: requestedFrom,
+      to: requestedTo,
+      isVolume: !requestedFrom.startsWith("/"),
+    };
   }
 
   toString() {

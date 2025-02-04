@@ -82,37 +82,37 @@ describe("MountPathMutator", () => {
           Binds: [`${FROM}/additional/path:/some/other/path`],
         },
       };
-  
+
       middleware.run({}, new URL("http://localhost/containers/create"), body);
-  
+
       expect(body.HostConfig.Binds).toEqual([
         `${TO}/additional/path:/some/other/path`,
       ]);
     });
-  
+
     it("correctly handles trying to break out", () => {
       const body = {
         HostConfig: {
           Binds: [`${FROM}/../../path:/some/other/path`],
         },
       };
-  
+
       middleware.run({}, new URL("http://localhost/containers/create"), body);
-  
+
       expect(body.HostConfig.Binds).toEqual([
         `${FROM}/../../path:/some/other/path`,
       ]);
     });
-  
+
     it("correctly handles data in front of the from", () => {
       const body = {
         HostConfig: {
           Binds: [`/test/${FROM}/../../path:/some/other/path`],
         },
       };
-  
+
       middleware.run({}, new URL("http://localhost/containers/create"), body);
-  
+
       expect(body.HostConfig.Binds).toEqual([
         `/test/${FROM}/../../path:/some/other/path`,
       ]);
@@ -121,8 +121,8 @@ describe("MountPathMutator", () => {
     it("handles a simple volume mapping (no subpathing", () => {
       const body = {
         HostConfig: {
-          Binds: ["/workspaces/project:/some/other/path"]
-        }
+          Binds: ["/workspaces/project:/some/other/path"],
+        },
       };
 
       const customMiddleware = new MountPathMutator({
@@ -130,10 +130,14 @@ describe("MountPathMutator", () => {
         to: "project-volume",
       });
 
-      customMiddleware.run({}, new URL("http://localhost/containers/create"), body);
+      customMiddleware.run(
+        {},
+        new URL("http://localhost/containers/create"),
+        body,
+      );
 
       expect(body.HostConfig.Binds).toEqual([
-        "project-volume:/some/other/path"
+        "project-volume:/some/other/path",
       ]);
     });
   });
@@ -152,11 +156,13 @@ describe("MountPathMutator", () => {
     it("remaps when exact matches occur", () => {
       const body = {
         HostConfig: {
-          Mounts: [{
-            Type: "bind",
-            Source: FROM,
-            Target: "/some/other/path",
-          }],
+          Mounts: [
+            {
+              Type: "bind",
+              Source: FROM,
+              Target: "/some/other/path",
+            },
+          ],
         },
       };
 
@@ -172,56 +178,62 @@ describe("MountPathMutator", () => {
     it("remaps when additional path is specified", () => {
       const body = {
         HostConfig: {
-          Mounts: [{
-            Type: "bind",
-            Source: `${FROM}/additional/path`,
-            Target: "/some/other/path",
-          }],
+          Mounts: [
+            {
+              Type: "bind",
+              Source: `${FROM}/additional/path`,
+              Target: "/some/other/path",
+            },
+          ],
         },
       };
-  
+
       middleware.run({}, new URL("http://localhost/containers/create"), body);
-  
+
       expect(body.HostConfig.Mounts[0]).toEqual({
         Type: "bind",
         Source: `${TO}/additional/path`,
         Target: "/some/other/path",
       });
     });
-  
+
     it("correctly handles trying to break out", () => {
       const body = {
         HostConfig: {
-          Mounts: [{
-            Type: "bind",
-            Source: `${FROM}/../../path`,
-            Target: "/some/other/path",
-          }],
+          Mounts: [
+            {
+              Type: "bind",
+              Source: `${FROM}/../../path`,
+              Target: "/some/other/path",
+            },
+          ],
         },
       };
-  
+
       middleware.run({}, new URL("http://localhost/containers/create"), body);
-  
+
       expect(body.HostConfig.Mounts[0]).toEqual({
         Type: "bind",
         Source: `${FROM}/../../path`,
         Target: "/some/other/path",
       });
     });
-  
+
     it("correctly handles data in front of the from", () => {
       const body = {
         HostConfig: {
-          Mounts: [{
-            Type: "bind",
-            Source: `/test/${FROM}/../../path`,
-            Target: "/some/other/path",
-          }],
+          Mounts: [
+            {
+              Type: "bind",
+              Source: `/test/${FROM}/../../path`,
+              Target: "/some/other/path",
+            },
+          ],
         },
       };
-  
+
       middleware.run({}, new URL("http://localhost/containers/create"), body);
-  
+
       expect(body.HostConfig.Mounts[0]).toEqual({
         Type: "bind",
         Source: `/test/${FROM}/../../path`,
@@ -232,11 +244,13 @@ describe("MountPathMutator", () => {
     it("handles a simple volume mapping (no subpathing", () => {
       const body = {
         HostConfig: {
-          Mounts: [{
-            Type: "bind",
-            Source: "/workspaces/project",
-            Target: "/some/other/path"
-          }],
+          Mounts: [
+            {
+              Type: "bind",
+              Source: "/workspaces/project",
+              Target: "/some/other/path",
+            },
+          ],
         },
       };
 
@@ -245,12 +259,16 @@ describe("MountPathMutator", () => {
         to: "project-volume",
       });
 
-      customMiddleware.run({}, new URL("http://localhost/containers/create"), body);
+      customMiddleware.run(
+        {},
+        new URL("http://localhost/containers/create"),
+        body,
+      );
 
       expect(body.HostConfig.Mounts[0]).toEqual({
         Type: "volume",
         Source: "project-volume",
-        Target: "/some/other/path"
+        Target: "/some/other/path",
       });
     });
   });
@@ -259,8 +277,8 @@ describe("MountPathMutator", () => {
     it("converts a bind to a mount with subpath", () => {
       const body = {
         HostConfig: {
-          Binds: ["/workspaces/project/dev/db:/some/other/path"]
-        }
+          Binds: ["/workspaces/project/dev/db:/some/other/path"],
+        },
       };
 
       const customMiddleware = new MountPathMutator({
@@ -268,18 +286,23 @@ describe("MountPathMutator", () => {
         to: "project-volume",
       });
 
-      customMiddleware.run({}, new URL("http://localhost/containers/create"), body);
+      customMiddleware.run(
+        {},
+        new URL("http://localhost/containers/create"),
+        body,
+      );
 
       expect(body.HostConfig.Binds).toEqual([]);
-      expect(body.HostConfig.Mounts).toEqual([{
-        Type: "volume",
-        Source: "project-volume",
-        Target: "/some/other/path",
-        VolumeOptions: {
-          Subpath: "dev/db"
-        }
-      }]);
+      expect(body.HostConfig.Mounts).toEqual([
+        {
+          Type: "volume",
+          Source: "project-volume",
+          Target: "/some/other/path",
+          VolumeOptions: {
+            Subpath: "dev/db",
+          },
+        },
+      ]);
     });
   });
-
 });
