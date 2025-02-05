@@ -1,4 +1,4 @@
-import { NamespaceAllowListGate } from "../../../src/middleware/gates/namespaceAllowListGate.mjs";
+import { NamespaceAllowListGate } from "../../../src/middleware/gates/namespaceAllowlistGate.mjs";
 
 describe("NamespaceAllowListGate", () => {
   let middleware;
