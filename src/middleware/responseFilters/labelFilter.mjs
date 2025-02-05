@@ -8,7 +8,9 @@ const PATHS = [
 export class LabelFilter {
   constructor(config) {
     if (!config.requiredLabels && !config.forbiddenLabels) {
-      throw new Error("Either 'requiredLabels' or 'forbiddenLabels' needs to be configured");
+      throw new Error(
+        "Either 'requiredLabels' or 'forbiddenLabels' needs to be configured",
+      );
     }
 
     this.requiredLabels = config.requiredLabels || {};
@@ -73,4 +75,4 @@ export class LabelFilter {
 export default {
   key: "labelFilter",
   class: LabelFilter,
-}
+};

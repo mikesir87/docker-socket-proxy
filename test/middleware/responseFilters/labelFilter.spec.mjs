@@ -122,7 +122,7 @@ describe("LabelFilter", () => {
         },
         { Id: "3", Labels: { "com.example.label": "wrong" } },
         { Id: "4", Labels: { "com.example.label2": "example2" } },
-        { Id: "5", Labels: { } },
+        { Id: "5", Labels: {} },
       ];
 
       middleware.run(url, networks);

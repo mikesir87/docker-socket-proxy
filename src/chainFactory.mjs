@@ -22,7 +22,11 @@ export class MiddlewareChainFactory {
 
     this.#configureType(this.config.gates, allGates, this.gates);
     this.#configureType(this.config.mutators, allMutators, this.mutators);
-    this.#configureType(this.config.responseFilters, allResponseFilters, this.responseFilters);
+    this.#configureType(
+      this.config.responseFilters,
+      allResponseFilters,
+      this.responseFilters,
+    );
   }
 
   /**

@@ -189,7 +189,13 @@ export class DockerSocketProxy {
 
     // Bail early without reading the body if needed
     if (!middlewareChain.hasMiddleware()) {
-      this.#sendProxyRequest(clientReq, clientRes, options, null, middlewareChain);
+      this.#sendProxyRequest(
+        clientReq,
+        clientRes,
+        options,
+        null,
+        middlewareChain,
+      );
       return;
     }
 
@@ -212,7 +218,13 @@ export class DockerSocketProxy {
     options.path = url.pathname + url.search;
 
     const bodyString = body ? JSON.stringify(body) : null;
-    this.#sendProxyRequest(clientReq, clientRes, options, bodyString, middlewareChain);
+    this.#sendProxyRequest(
+      clientReq,
+      clientRes,
+      options,
+      bodyString,
+      middlewareChain,
+    );
   }
 
   /**
@@ -223,7 +235,13 @@ export class DockerSocketProxy {
    * @param {*} bodyToSend An optional body to send with the request
    * @param {MiddlewareChain} middlewareChain The middleware chain that was used to modify the request
    */
-  #sendProxyRequest(clientReq, clientRes, proxyRequestOptions, bodyToSend, middlewareChain) {
+  #sendProxyRequest(
+    clientReq,
+    clientRes,
+    proxyRequestOptions,
+    bodyToSend,
+    middlewareChain,
+  ) {
     if (bodyToSend && bodyToSend.length > 0)
       proxyRequestOptions.headers["content-length"] =
         Buffer.byteLength(bodyToSend);
@@ -232,7 +250,9 @@ export class DockerSocketProxy {
       clientRes.writeHead(proxyResponse.statusCode, proxyResponse.headers);
       clientRes.flushHeaders();
 
-      proxyResponse.on("end", () => console.log("[PROXY RESPONSE] end: " + proxyRequestOptions.path));
+      proxyResponse.on("end", () =>
+        console.log("[PROXY RESPONSE] end: " + proxyRequestOptions.path),
+      );
 
       if (!middlewareChain.hasResponseFilters()) {
         return proxyResponse.pipe(clientRes);
@@ -244,18 +264,18 @@ export class DockerSocketProxy {
       });
 
       proxyResponse.on("end", () => {
-        const responseBody = JSON.parse(Buffer.concat(responseBodyChunks).toString());
-
-        const url = new URL(
-          `http://localhost${proxyRequestOptions.path}`,
+        const responseBody = JSON.parse(
+          Buffer.concat(responseBodyChunks).toString(),
         );
+
+        const url = new URL(`http://localhost${proxyRequestOptions.path}`);
 
         middlewareChain.applyResponseFilters(url, responseBody);
         clientRes.end(JSON.stringify(responseBody));
       });
     });
 
-    if (proxyRequestOptions.headers["content-length"] !== undefined) 
+    if (proxyRequestOptions.headers["content-length"] !== undefined)
       proxyRequest.write(bodyToSend || "");
 
     clientReq.pipe(proxyRequest);
