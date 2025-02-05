@@ -9,11 +9,10 @@ mutators:
     from: nginx
     to: ghcr.io/mikesir87/nginx-mirror
 
-filters:
-  # Remove all items from the lists of containers, images, networks, and volumes that have ALL of the specified labels
+responseFilters:
   - type: labelFilter
-    labels:
-      com.example: test-value
+    requiredLabels:
+      com.mikesir87.example: test-value
 
 gates:
   - type: registry

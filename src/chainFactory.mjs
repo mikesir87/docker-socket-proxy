@@ -14,27 +14,15 @@ export class MiddlewareChainFactory {
   async bootstrap() {
     const allGates = await this.#loadModules("gates");
     const allMutators = await this.#loadModules("mutators");
+    const allResponseFilters = await this.#loadModules("responseFilters");
 
     this.gates = [];
     this.mutators = [];
+    this.responseFilters = [];
 
-    for (let mutator of this.config.mutators) {
-      if (!allMutators[mutator.type]) {
-        console.error(`Unknown mutator type on config: ${mutator.type}`);
-        continue;
-      }
-
-      this.mutators.push(new allMutators[mutator.type](mutator));
-    }
-
-    for (let gate of this.config.gates) {
-      if (!allGates[gate.type]) {
-        console.error(`Unknown gate type on config: ${gate.type}`);
-        continue;
-      }
-
-      this.gates.push(new allGates[gate.type](gate));
-    }
+    this.#configureType(this.config.gates, allGates, this.gates);
+    this.#configureType(this.config.mutators, allMutators, this.mutators);
+    this.#configureType(this.config.responseFilters, allResponseFilters, this.responseFilters);
   }
 
   /**
@@ -47,6 +35,7 @@ export class MiddlewareChainFactory {
     const newChain = new MiddlewareChain(
       this.gates.filter((gate) => gate.applies(method, url)),
       this.mutators.filter((mutator) => mutator.applies(method, url)),
+      this.responseFilters.filter((filter) => filter.applies(method, url)),
     );
 
     return newChain;
@@ -86,6 +75,17 @@ export class MiddlewareChainFactory {
     return modules;
   }
 
+  #configureType(config, allTypes, collection) {
+    for (let configItem of config) {
+      if (!allTypes[configItem.type]) {
+        console.error(`Unrecognized type in configuration: ${configItem.type}`);
+        continue;
+      }
+
+      collection.push(new allTypes[configItem.type](configItem));
+    }
+  }
+
   toString() {
     return [
       "Chain factory configuration",
@@ -93,6 +93,8 @@ export class MiddlewareChainFactory {
       ...this.gates.map((gate) => `---- ${gate.toString()}`),
       "-- Mutators:",
       ...this.mutators.map((mutator) => `---- ${mutator.toString()}`),
+      "-- Response filters:",
+      ...this.responseFilters.map((filter) => `---- ${filter.toString()}`),
     ].join("\n");
   }
 }

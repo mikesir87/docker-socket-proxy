@@ -97,8 +97,11 @@ There are several middleware options available.
 
 - **Mutators** have the ability to modify the request on the way in
 - **Gates** have the ability to block requests
+- **Response filters** have the ability to modify the responses coming back from the engine
 
-### Read-only gate
+### Gates
+
+#### Read-only gate
 
 To enable read-only mode, add the readonly gate. No additional configuration is currently supported.
 
@@ -108,7 +111,7 @@ gates:
 ```
 
 
-### Registry gate
+#### Registry gate
 
 To create an allowlist of the registries that are allowed to be used for image pulling, add the following gate:
 
@@ -118,7 +121,7 @@ gates:
     registries: ["docker.io", "ghcr.io"]
 ```
 
-### Namespace allowlist gate
+#### Namespace allowlist gate
 
 To create an allowlist of the namespaces that are allowed to be used for image pulling, add the following gate:
 
@@ -131,7 +134,9 @@ gates:
 Note that the namespaces here is everything between the domain and the final repository name in an image name. For example, an image pull for `ghcr.io/mikesir87/demo` would have the namespace of `mikesir87`.
 
 
-### Mount path mutator
+### Mutators
+
+#### Mount path mutator
 
 This mutator is helpful when doing Docker-out-of-Docker setups (sharing the Docker socket with a container) or devcontainer environments.
 
@@ -149,7 +154,7 @@ mutators:
     to: workspace-volume
 ```
 
-### Add label mutator
+#### Add label mutator
 
 To add labels to all created containers, images, networks, and volumes, add the following mutator:
 
@@ -161,7 +166,7 @@ mutators:
       another.label: another-value
 ```
 
-### Remap image mutator
+#### Remap image mutator
 
 The remap image mutator allows you to rewrite the images being used when creating containers. Note that multiple remappings can occur, but only one pass will run using the configured order.
 
@@ -174,6 +179,34 @@ mutators:
     from: node:lts
     to: node:lts-alpine
 ```
+
+### Response filters
+
+#### Label filter
+
+The label filter provides the ability to filter the collection listings of containers, images, networks, and volumes to include items that have either the required labels or omit forbidden labels.
+
+The following snippet will filter all items and return ONLY those that match ALL specified required labels.
+
+```yaml
+responseFilters:
+  - type: labelFilter
+    requiredLabels:
+      com.example.required-key1: value1
+      com.example.required-key2: value2
+```
+
+The following snippet will filter all items and return ONLY those that do NOT have the specified labels.
+
+```yaml
+responseFilters:
+  - type: labelFilter
+    forbiddenLabels:
+      com.example.forbidden-key1: value1
+      com.example.forbidden-key2: value2
+```
+
+You are allowed to have a filter that defines both `requiredLabels` and `forbiddenLabels`.
 
 ## Contributing or requests
 

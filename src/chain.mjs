@@ -1,11 +1,12 @@
 export class MiddlewareChain {
-  constructor(gates, mutators) {
+  constructor(gates, mutators, responseFilters) {
     this.gates = gates;
     this.mutators = mutators;
+    this.responseFilters = responseFilters;
   }
 
   hasMiddleware() {
-    return this.hasGates() || this.hasMutators();
+    return this.hasGates() || this.hasMutators() || this.hasResponseFilters();
   }
 
   hasMutators() {
@@ -14,6 +15,10 @@ export class MiddlewareChain {
 
   hasGates() {
     return this.gates.length > 0;
+  }
+
+  hasResponseFilters() {
+    return this.responseFilters.length > 0;
   }
 
   applyMutators(requestOptions, url, body) {
@@ -25,6 +30,12 @@ export class MiddlewareChain {
   applyGates(requestOptions, url, body) {
     for (let middleware of this.gates) {
       middleware.run(requestOptions, url, body);
+    }
+  }
+
+  applyResponseFilters(url, responseBody) {
+    for (let middleware of this.responseFilters) {
+      middleware.run(url, responseBody);
     }
   }
 

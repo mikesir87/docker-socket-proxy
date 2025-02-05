@@ -19,6 +19,7 @@ export class Config {
 
     if (!data.gates) data.gates = [];
     if (!data.mutators) data.mutators = [];
+    if (!data.responseFilters) data.responseFilters = [];
 
     return data;
   }
