@@ -18,7 +18,10 @@ describe("MountSourceGate", () => {
   describe("applies", () => {
     it("applies to POST /containers/create", () => {
       expect(
-        middleware.applies("POST", new URL("http://localhost/containers/create")),
+        middleware.applies(
+          "POST",
+          new URL("http://localhost/containers/create"),
+        ),
       ).toBe(true);
     });
 
@@ -48,7 +51,9 @@ describe("MountSourceGate", () => {
       const url = new URL("http://localhost/containers/create");
       const body = {
         HostConfig: {
-          Mounts: [{ Source: "/var/run/docker.sock", Target: "/var/run/docker.sock" }],
+          Mounts: [
+            { Source: "/var/run/docker.sock", Target: "/var/run/docker.sock" },
+          ],
         },
       };
 
@@ -91,11 +96,13 @@ describe("MountSourceGate", () => {
       const url = new URL("http://localhost/containers/create");
       const body = {
         HostConfig: {
-          Mounts: [{ 
-            Type: "volume",
-            Source: "project", 
-            Target: "/home/project" 
-          }],
+          Mounts: [
+            {
+              Type: "volume",
+              Source: "project",
+              Target: "/home/project",
+            },
+          ],
         },
       };
 
