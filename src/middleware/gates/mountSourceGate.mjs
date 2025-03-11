@@ -32,7 +32,7 @@ export class MountSourceGate {
   }
 
   toString() {
-    return `MountSourceGate - allowing mounts from the following sources: ${this.namespaces.join(", ")}`;
+    return `MountSourceGate - allowing mounts from the following sources: ${this.allowedSources.join(", ")}`;
   }
 }
 
