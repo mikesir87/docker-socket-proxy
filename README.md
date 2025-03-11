@@ -133,6 +133,18 @@ gates:
 
 Note that the namespaces here is everything between the domain and the final repository name in an image name. For example, an image pull for `ghcr.io/mikesir87/demo` would have the namespace of `mikesir87`.
 
+#### Mount source gate
+
+To authorize new containers to only allow mount points from a specific location, use the following gate:
+
+```yaml
+gates:
+  - type: mountSource
+    allowedSources:
+      - /path/to/source
+      - volume-name
+```
+
 
 ### Mutators
 
