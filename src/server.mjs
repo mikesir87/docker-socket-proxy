@@ -174,7 +174,6 @@ export class DockerSocketProxy {
     console.log(`[${clientReq.method}] ${clientReq.url}`);
 
     const options = {
-      socketPath: this.forwardPath,
       path: clientReq.url,
       method: clientReq.method,
       headers: clientReq.headers,
@@ -216,6 +215,7 @@ export class DockerSocketProxy {
     }
 
     options.path = url.pathname + url.search;
+    options.socketPath = this.forwardPath;
 
     const bodyString = body ? JSON.stringify(body) : null;
     this.#sendProxyRequest(
