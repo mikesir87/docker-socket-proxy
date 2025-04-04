@@ -145,6 +145,15 @@ gates:
       - volume-name
 ```
 
+#### Image loading gate
+
+To block all image loading, use the following gate:
+
+```yaml
+gates:
+  - type: imageLoading
+```
+
 
 ### Mutators
 
