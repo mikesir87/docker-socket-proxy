@@ -281,6 +281,12 @@ export class DockerSocketProxy {
       proxyRequest.write(bodyToSend || "");
 
     clientReq.pipe(proxyRequest);
+
+    proxyRequest.on("error", (err) => {
+      console.error("Error while proxying request", err);
+      clientRes.writeHead(500, { "Content-Type": "text/plain" });
+      clientRes.end("Upstream connection error. Is the Docker daemon running?");
+    });
   }
 
   /**
