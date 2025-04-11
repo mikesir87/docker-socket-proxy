@@ -7,7 +7,7 @@ export class Config {
   }
 
   static getListeningSocketPath() {
-    const path = process.env.LISTEN_SOCKET_PATH || "/tmp/node-server.sock";
+    const path = process.env.LISTEN_SOCKET_PATH || "/tmp/docker.sock";
     if (fs.existsSync(path)) {
       fs.unlinkSync(path);
     }

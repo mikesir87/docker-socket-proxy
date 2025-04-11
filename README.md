@@ -10,7 +10,36 @@ Sample use cases might be to remap volume paths, add labels, or block certain re
 >
 > Sockets created inside a container and mounted to the host do _not_ work as expected and is a known limitation.
 
-## Quick start
+
+## High-level Architecture
+
+This proxy allows for a very similar pattern from Kubernetes where all API requests go through mutation and admission controllers before being accepted by the API. Additionally, response filters enable the ability to mutate or filter responses.
+
+```mermaid
+%%{init: {'sequence': {'mirrorActors': false}}}%%
+
+sequenceDiagram
+    participant I as Invoker
+
+    box Docker Socket Proxy
+        participant B as Mutators
+        participant C as Validators
+        participant E as Response Filters
+    end
+
+    participant D as Actual Docker Socket
+
+    I->>B: Request
+    B->>B: Make mutations
+    B->>C: 
+    C->>C: Validate the request
+    C->>D: Forward the validated request
+    D->>E: Send response
+    E->>E: Filter the response
+    E->>I: Send final response back to invoker
+```
+
+## Quick start - read-only access
 
 1. Create a new (and proxied) Docker socket by running the following command:
 
@@ -50,7 +79,7 @@ Sample use cases might be to remap volume paths, add labels, or block certain re
    docker ps
    ```
 
-## Another example
+### Using the proxy with reverse proxies
 
 The socket proxy, by default, will allow all requests. To change the rules, you will need to provide a YAML config file (see [Proxy configuration](#proxy-configuration) below).
 
@@ -92,6 +121,20 @@ volumes:
 ```
 
 ## Proxy configuration
+
+The following environment variables can be used to configure the proxy.
+
+Either `CONFIG_FILE` or `CONFIG_DATA` must be specified.
+
+| Variable            | Description                                                                 | Default value           |
+|---------------------|-----------------------------------------------------------------------------|-------------------------|
+| `CONFIG_FILE`       | Path to the middleware configuration YAML configuration file.  | None                    |
+| `CONFIG_DATA`       | YAML configuration provided as an environment variable.                   | None                    |
+| `LISTEN_SOCKET_PATH`| Path where the new proxy socket will be created.  | `/tmp/docker.sock` |
+| `FORWARDING_SOCKET_PATH` | The socket the proxy should forward requests | `/var/run/docker.sock` |
+
+
+## Middleware configuration
 
 There are several middleware options available. 
 
