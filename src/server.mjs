@@ -206,7 +206,7 @@ export class DockerSocketProxy {
     // Bail early without reading the body if needed
     if (!middlewareChain.hasMiddleware()) {
       options.socketPath = this.forwardPath;
-      
+
       this.#sendProxyRequest(
         clientReq,
         clientRes,

@@ -24,9 +24,7 @@ describe("ImageLoadBlockGate", () => {
   describe("run", () => {
     it("blocks image loading", () => {
       const requestOptions = {};
-      const url = new URL(
-        "http://localhost/images/load",
-      );
+      const url = new URL("http://localhost/images/load");
       const body = {};
 
       expect(() => middleware.run(requestOptions, url, body)).toThrow(
