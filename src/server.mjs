@@ -29,6 +29,7 @@ var createHttpHeader = function (line, headers) {
 
 export class DockerSocketProxy {
   #server;
+  #openConnections;
 
   /**
    *
@@ -46,6 +47,9 @@ export class DockerSocketProxy {
    * Start the proxy server
    */
   start() {
+    const openConnections = new Set();
+    this.#openConnections = openConnections;
+
     this.#server = http
       .createServer(this.#onRequestWrapper.bind(this))
       .listen(this.listenPath);
@@ -54,6 +58,12 @@ export class DockerSocketProxy {
       fs.chmodSync(this.listenPath, "777");
 
     this.#server.on("upgrade", this.#onUpgradeRequest.bind(this));
+    this.#server.on("connection", (socket) => {
+      openConnections.add(socket);
+      socket.on("close", () => {
+        openConnections.delete(socket);
+      });
+    });
 
     console.log(`Listening and ready to accept requests on ${this.listenPath}`);
     console.log(`Forwarding requests to ${this.forwardPath}`);
@@ -145,8 +155,15 @@ export class DockerSocketProxy {
    */
   stop() {
     const close = this.#server.close.bind(this.#server);
+
+    this.#openConnections.forEach((socket) => {
+      socket.destroy();
+    });
+    this.#openConnections.clear();
+
     return new Promise(function (acc) {
       close();
+      acc();
     });
   }
 
