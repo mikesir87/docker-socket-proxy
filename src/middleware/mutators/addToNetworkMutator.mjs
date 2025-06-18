@@ -1,11 +1,10 @@
-
 export class AddToNetworkMutator {
   constructor(config) {
     if (!config.networks) {
       throw new Error("Missing 'networks' in config");
     }
 
-    this.networks = config.networks; 
+    this.networks = config.networks;
   }
 
   applies(method, url) {
@@ -16,12 +15,16 @@ export class AddToNetworkMutator {
     console.log("Going to add networks", JSON.stringify(body, null, 2));
 
     if (body.HostConfig.NetworkMode === "host") {
-      console.warn("Cannot add networks to a container with 'host' network mode. Skipping.");
+      console.warn(
+        "Cannot add networks to a container with 'host' network mode. Skipping.",
+      );
       return;
     }
 
     if (body.HostConfig.NetworkMode === "none") {
-      console.warn("Cannot add networks to a container with 'none' network mode. Skipping.");
+      console.warn(
+        "Cannot add networks to a container with 'none' network mode. Skipping.",
+      );
       return;
     }
 
@@ -29,8 +32,10 @@ export class AddToNetworkMutator {
       body.HostConfig.NetworkMode = this.networks[0];
       body.NetworkingConfig.EndpointsConfig = {};
     }
-    
-    const connectedNetworks = Object.keys(body.NetworkingConfig.EndpointsConfig || {});
+
+    const connectedNetworks = Object.keys(
+      body.NetworkingConfig.EndpointsConfig || {},
+    );
     for (const network of this.networks) {
       if (!connectedNetworks.includes(network)) {
         body.NetworkingConfig.EndpointsConfig[network] = {};

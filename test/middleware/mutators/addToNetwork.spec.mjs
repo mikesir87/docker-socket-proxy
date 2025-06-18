@@ -14,7 +14,7 @@ describe("AddToNetworkMutator", () => {
   describe("applies", () => {
     it("applies to POST /containers/create", () => {
       const middleware = new AddToNetworkMutator({
-        networks: ["demo"]
+        networks: ["demo"],
       });
 
       expect(
@@ -27,14 +27,11 @@ describe("AddToNetworkMutator", () => {
 
     it("does not apply to GET /containers/json", () => {
       const middleware = new AddToNetworkMutator({
-        networks: ["demo"]
+        networks: ["demo"],
       });
 
       expect(
-        middleware.applies(
-          "GET",
-          new URL("http://localhost/containers/json"),
-        ),
+        middleware.applies("GET", new URL("http://localhost/containers/json")),
       ).toBe(false);
     });
   });
@@ -135,6 +132,5 @@ describe("AddToNetworkMutator", () => {
         test: {},
       });
     });
-
   });
 });

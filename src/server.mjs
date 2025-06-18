@@ -290,7 +290,7 @@ export class DockerSocketProxy {
           console.log(
             `[PROXY RESPONSE] ${proxyRequestOptions.path} - ${proxyResponse.statusCode} - ${responseBodyString}`,
           );
-          clientRes.end();  
+          clientRes.end();
           return;
         }
 
