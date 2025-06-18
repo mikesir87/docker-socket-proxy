@@ -230,6 +230,19 @@ mutators:
       another.label: another-value
 ```
 
+#### Add to network mutator
+
+To add a container to specified networks, use the following mutator:
+
+```yaml
+mutators:
+  - type: addTonetwork
+    networks:
+      - demo
+```
+
+**NOTE:** this will _not_ mutate containers that are either using the _host_ or _none_ network modes.
+
 #### Remap image mutator
 
 The remap image mutator allows you to rewrite the images being used when creating containers. Note that multiple remappings can occur, but only one pass will run using the configured order.
