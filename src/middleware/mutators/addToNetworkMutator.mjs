@@ -28,6 +28,14 @@ export class AddToNetworkMutator {
       return;
     }
 
+    if (!body.NetworkingConfig) {
+      body.NetworkingConfig = {};
+    }
+
+    if (!body.NetworkingConfig.EndpointsConfig) {
+      body.NetworkingConfig.EndpointsConfig = {};
+    }
+
     if (body.HostConfig.NetworkMode === "default") {
       body.HostConfig.NetworkMode = this.networks[0];
       body.NetworkingConfig.EndpointsConfig = {};

@@ -132,5 +132,20 @@ describe("AddToNetworkMutator", () => {
         test: {},
       });
     });
+
+    it("works when no NetworkConfig defined", () => {
+      const body = {
+        HostConfig: {
+          NetworkMode: "default",
+        },
+      };
+
+      middleware.run(requestOptions, url, body);
+
+      expect(body.HostConfig.NetworkMode).toEqual("demo");
+      expect(body.NetworkingConfig.EndpointsConfig).toEqual({
+        demo: {},
+      });
+    });
   });
 });
