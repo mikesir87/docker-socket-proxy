@@ -204,7 +204,7 @@ export class DockerSocketProxy {
     );
 
     // Bail early without reading the body if needed
-    if (!middlewareChain.hasMiddleware()) {
+    if (!middlewareChain.hasMiddleware() && 1 == 2) {
       options.socketPath = this.forwardPath;
 
       this.#sendProxyRequest(
@@ -218,6 +218,7 @@ export class DockerSocketProxy {
     }
 
     const body = await this.#readRequestData(clientReq);
+    console.log("[REQUEST BODY] " + JSON.stringify(body));
 
     try {
       middlewareChain.applyMutators(options, url, body);
@@ -283,9 +284,17 @@ export class DockerSocketProxy {
       });
 
       proxyResponse.on("end", () => {
-        const responseBody = JSON.parse(
-          Buffer.concat(responseBodyChunks).toString(),
-        );
+        const responseBodyString = Buffer.concat(responseBodyChunks).toString();
+
+        if (proxyResponse.statusCode / 100 !== 2) {
+          console.log(
+            `[PROXY RESPONSE] ${proxyRequestOptions.path} - ${proxyResponse.statusCode} - ${responseBodyString}`,
+          );
+          clientRes.end();  
+          return;
+        }
+
+        const responseBody = JSON.parse(responseBodyString);
 
         const url = new URL(`http://localhost${proxyRequestOptions.path}`);
 
