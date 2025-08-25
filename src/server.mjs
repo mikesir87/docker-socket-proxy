@@ -221,8 +221,8 @@ export class DockerSocketProxy {
     console.log("[REQUEST BODY] " + JSON.stringify(body));
 
     try {
-      middlewareChain.applyMutators(options, url, body);
-      middlewareChain.applyGates(options, url, body);
+      await middlewareChain.applyMutators(options, url, body);
+      await middlewareChain.applyGates(options, url, body);
     } catch (err) {
       console.log("ERROR", err);
       const statusCode = err.name === "ValidationError" ? 403 : 500;

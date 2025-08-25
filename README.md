@@ -186,7 +186,20 @@ gates:
     allowedSources:
       - /path/to/source
       - volume-name
+      - label:requiredKey=requiredValue
 ```
+
+Multiple labels can be specified as a single rule (`label:requiredKey1=requiredValue1,requiredKey2=requiredValue2`). Within a single rule, the labels are AND'd. As an example:
+
+```yaml
+gates:
+  - type: mountSource
+    allowedSources:
+      - label:required1=value1,required2=value2
+      - label:otherKey=other1
+```
+
+The previous configuration would allow volumes that have labels (`required1=value1` AND `required2=value2`) OR `otherKey=other1`.
 
 #### Image loading gate
 

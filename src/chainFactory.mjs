@@ -6,9 +6,17 @@ import { MiddlewareChain } from "./chain.mjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+/**
+ * The MiddlewareChainFactory is used to both create the individual Middleware components
+ * and to assemble them into a processing chain for incoming requests.
+ *
+ * It receives the raw YAML config and processes the gates, mutators, and response filters.
+ * As requests come in, it creates a chain of middleware objects that apply to the request.
+ */
 export class MiddlewareChainFactory {
-  constructor(config) {
+  constructor(config, metadataStore) {
     this.config = config;
+    this.metadataStore = metadataStore;
   }
 
   async bootstrap() {
@@ -30,6 +38,8 @@ export class MiddlewareChainFactory {
   }
 
   /**
+   * Creates a middleware chain for a specific incoming request. The chain provides the
+   * mutators, gates, and response filters specific to the request.
    *
    * @param {string} method The HTTP method of the incoming request
    * @param {URL} url The URL of the incoming request, complete with search parameters
@@ -45,6 +55,12 @@ export class MiddlewareChainFactory {
     return newChain;
   }
 
+  /**
+   * Load the modules from the filesystem into an object, making it easy to instantiate a specific
+   * middleware.
+   * @param {string} type The type of middleware to load (e.g., "gates", "mutators", "responseFilters")
+   * @returns {Promise<Object>} A promise that resolves to an object mapping middleware keys to their classes
+   */
   async #loadModules(type) {
     const modules = {};
     const moduleFilepaths = await glob(`**/${type}/*.mjs`, {
@@ -79,14 +95,25 @@ export class MiddlewareChainFactory {
     return modules;
   }
 
-  #configureType(config, allTypes, collection) {
+  /**
+   * Configures a specific type of middleware based on the provided configuration.
+   * @param {Array} config The configuration for the middleware
+   * @param {Object} availableMiddleware All available middleware for the specific type
+   * @param {Array} collection The collection to populate with configured middleware
+   */
+  #configureType(config, availableMiddleware, collection) {
     for (let configItem of config) {
-      if (!allTypes[configItem.type]) {
+      if (!availableMiddleware[configItem.type]) {
         console.error(`Unrecognized type in configuration: ${configItem.type}`);
         continue;
       }
 
-      collection.push(new allTypes[configItem.type](configItem));
+      collection.push(
+        new availableMiddleware[configItem.type](
+          configItem,
+          this.metadataStore,
+        ),
+      );
     }
   }
 
