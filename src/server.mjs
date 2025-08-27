@@ -218,7 +218,6 @@ export class DockerSocketProxy {
     }
 
     const body = await this.#readRequestData(clientReq);
-    console.log("[REQUEST BODY] " + JSON.stringify(body));
 
     try {
       await middlewareChain.applyMutators(options, url, body);

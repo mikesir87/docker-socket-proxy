@@ -298,6 +298,22 @@ responseFilters:
 
 You are allowed to have a filter that defines both `requiredLabels` and `forbiddenLabels`.
 
+Additionally, the filter can be configured to filter on certain types of objects. The default value is `["containers", "networks", "volumes", "images"]`.
+
+The following configuration will filter all containers, networks, and volumes, but allow all images. 
+
+```yaml
+responseFilters:
+  - type: labelFilter
+    objectsToFilter:
+      - containers
+      - networks
+      - volumes
+    requiredLabels:
+      com.example.required-key1: value1
+```
+  
+
 ## Contributing or requests
 
 If you have requests for different types of mutators, create an issue and let's talk about it!
