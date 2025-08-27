@@ -51,6 +51,32 @@ describe("LabelFilter", () => {
         ),
       ).toBe(false);
     });
+
+    it("doesn't apply to objects when objectsToFilter is provided", () => {
+      const middleware = new LabelFilter({
+        objectsToFilter: ["containers"],
+        forbiddenLabels: {
+          "com.example.label": "example",
+          "com.example.label2": "example2",
+        },
+      });
+
+      expect(
+        middleware.applies("GET", new URL("http://localhost/containers/json")),
+      ).toBe(true);
+
+      expect(
+        middleware.applies("GET", new URL("http://localhost/images/json")),
+      ).toBe(false);
+
+      expect(
+        middleware.applies("GET", new URL("http://localhost/networks")),
+      ).toBe(false);
+
+      expect(
+        middleware.applies("GET", new URL("http://localhost/volumes")),
+      ).toBe(false);
+    });
   });
 
   describe("run with omitLabels", () => {

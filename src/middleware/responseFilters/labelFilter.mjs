@@ -17,19 +17,31 @@ export class LabelFilter {
     this.forbiddenLabels = config.forbiddenLabels || {};
     this.hasRequiredLabels = Object.keys(this.requiredLabels).length > 0;
     this.hasForbiddenLabels = Object.keys(this.forbiddenLabels).length > 0;
+
+    this.objectsToFilter = config.objectsToFilter || [
+      "containers",
+      "images",
+      "networks",
+      "volumes",
+    ];
+    this.pathsToFilter = PATHS.filter(([path]) =>
+      this.objectsToFilter.includes(path.split("/")[1]),
+    );
   }
 
   applies(method, url) {
     if (method !== "GET") return false;
 
-    return PATHS.some(([path]) => url.pathname.endsWith(path));
+    return this.pathsToFilter.some(([path]) => url.pathname.endsWith(path));
   }
 
   run(url, body) {
     const forbiddenLabels = this.forbiddenLabels;
     const requiredLabels = this.requiredLabels;
 
-    const matchingUrlPath = PATHS.find(([path]) => url.pathname.endsWith(path));
+    const matchingUrlPath = this.pathsToFilter.find(([path]) =>
+      url.pathname.endsWith(path),
+    );
     const collectionKey = matchingUrlPath[1];
     const itemKey = matchingUrlPath[2];
 
@@ -68,7 +80,7 @@ export class LabelFilter {
   }
 
   toString() {
-    return `LabelFilterMiddleware - Forbidden: ${JSON.stringify(this.forbiddenLabels)}; Required: ${JSON.stringify(this.requiredLabels)}`;
+    return `LabelFilterMiddleware - Forbidden: ${JSON.stringify(this.forbiddenLabels)}; Required: ${JSON.stringify(this.requiredLabels)}; Objects: ${JSON.stringify(this.objectsToFilter)}`;
   }
 }
 
