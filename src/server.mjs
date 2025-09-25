@@ -40,6 +40,7 @@ export class DockerSocketProxy {
   constructor(listenPath, forwardPath, middlewareChainFactory) {
     this.listenPath = listenPath;
     this.forwardPath = forwardPath;
+    this.forwardPathIsPort = !Number.isNaN(parseInt(this.forwardPath));
     this.middlewareChainFactory = middlewareChainFactory;
   }
 
@@ -74,32 +75,43 @@ export class DockerSocketProxy {
    *
    * @param {http.IncomingMessage} req
    * @param {net.Socket} socket
-   * @param {Buffer} reqBody
+   * @param {Buffer} head
    * @returns
    */
-  async #onUpgradeRequest(req, socket, reqBody) {
-    if (req.headers["upgrade"] !== "tcp") {
+  async #onUpgradeRequest(req, socket, head) {
+    const upgrade = (req.headers["upgrade"] || "").toLowerCase();
+    const tokens = upgrade.split(",").map((s) => s.trim());
+    if (!tokens.includes("tcp") && !tokens.includes("h2c")) {
       console.log(`[UPGRADE REQUEST] ${req.url} - denied`);
       socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
       socket.destroy();
       return;
     }
 
-    console.log(`[UPGRADE REQUEST] ${req.url} - accepted`);
+    console.log(`[UPGRADE REQUEST] ${req.url} - accepted - ${upgrade}`);
     socket.setTimeout(0);
     socket.setNoDelay(true);
     socket.setKeepAlive(true, 0);
 
-    const rightRequestOptions = {
-      socketPath: this.forwardPath,
+    const headers = { ...req.headers };
+    if (headers["x-docker-expose-session-grpc-method"]) {
+      headers["x-docker-expose-session-grpc-method"] =
+        headers["x-docker-expose-session-grpc-method"].split(", ");
+    }
+
+    const proxyReqOptions = {
       path: req.url,
       method: req.method,
-      headers: req.headers,
+      headers,
     };
 
-    const proxyReq = http.request(rightRequestOptions);
+    if (this.forwardPathIsPort) {
+      proxyReqOptions.port = this.forwardPath;
+    } else {
+      proxyReqOptions.socketPath = this.forwardPath;
+    }
 
-    if (reqBody) proxyReq.write(reqBody);
+    const proxyReq = http.request(proxyReqOptions);
 
     proxyReq.on("error", (err) => {
       console.error("Error while proxying upgrade request", err);
@@ -120,11 +132,23 @@ export class DockerSocketProxy {
             res.headers,
           ),
         );
+        res.on("error", () => socket.end());
         res.pipe(socket);
       }
     });
 
     proxyReq.on("upgrade", function (proxyRes, proxySocket, proxyHead) {
+      socket.write(
+        createHttpHeader("HTTP/1.1 101 Switching Protocols", proxyRes.headers),
+      );
+
+      if (head && head.length) proxySocket.write(head);
+      if (proxyHead && proxyHead.length) socket.write(proxyHead);
+
+      proxySocket.setTimeout(0);
+      proxySocket.setNoDelay(true);
+      proxySocket.setKeepAlive(true, 0);
+
       proxySocket.on("error", (err) => {
         console.error("Proxy socket error", err);
         socket.end();
@@ -136,12 +160,6 @@ export class DockerSocketProxy {
       socket.on("error", function () {
         proxySocket.end();
       });
-
-      if (proxyHead && proxyHead.length) proxySocket.unshift(proxyHead);
-
-      socket.write(
-        createHttpHeader("HTTP/1.1 101 Switching Protocols", proxyRes.headers),
-      );
 
       proxySocket.pipe(socket).pipe(proxySocket);
     });
@@ -204,9 +222,7 @@ export class DockerSocketProxy {
     );
 
     // Bail early without reading the body if needed
-    if (!middlewareChain.hasMiddleware() && 1 == 2) {
-      options.socketPath = this.forwardPath;
-
+    if (!middlewareChain.hasMiddleware()) {
       this.#sendProxyRequest(
         clientReq,
         clientRes,
@@ -234,7 +250,6 @@ export class DockerSocketProxy {
     }
 
     options.path = url.pathname + url.search;
-    options.socketPath = this.forwardPath;
 
     const bodyString = body ? JSON.stringify(body) : null;
     this.#sendProxyRequest(
@@ -261,6 +276,12 @@ export class DockerSocketProxy {
     bodyToSend,
     middlewareChain,
   ) {
+    if (this.forwardPathIsPort) {
+      proxyRequestOptions.port = this.forwardPath;
+    } else {
+      proxyRequestOptions.socketPath = this.forwardPath;
+    }
+
     if (bodyToSend && bodyToSend.length > 0)
       proxyRequestOptions.headers["content-length"] =
         Buffer.byteLength(bodyToSend);
