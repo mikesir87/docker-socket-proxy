@@ -79,9 +79,9 @@ export class DockerSocketProxy {
    * @returns
    */
   async #onUpgradeRequest(req, socket, head) {
-    const upgrade = (req.headers['upgrade'] || '').toLowerCase();
-    const tokens = upgrade.split(',').map(s => s.trim());
-    if (!tokens.includes('tcp') && !tokens.includes('h2c')) {
+    const upgrade = (req.headers["upgrade"] || "").toLowerCase();
+    const tokens = upgrade.split(",").map((s) => s.trim());
+    if (!tokens.includes("tcp") && !tokens.includes("h2c")) {
       console.log(`[UPGRADE REQUEST] ${req.url} - denied`);
       socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
       socket.destroy();
@@ -95,7 +95,8 @@ export class DockerSocketProxy {
 
     const headers = { ...req.headers };
     if (headers["x-docker-expose-session-grpc-method"]) {
-      headers["x-docker-expose-session-grpc-method"] = headers["x-docker-expose-session-grpc-method"].split(", ");
+      headers["x-docker-expose-session-grpc-method"] =
+        headers["x-docker-expose-session-grpc-method"].split(", ");
     }
 
     const proxyReqOptions = {
@@ -108,7 +109,7 @@ export class DockerSocketProxy {
       proxyReqOptions.port = this.forwardPath;
     } else {
       proxyReqOptions.socketPath = this.forwardPath;
-    }    
+    }
 
     const proxyReq = http.request(proxyReqOptions);
 
@@ -131,13 +132,15 @@ export class DockerSocketProxy {
             res.headers,
           ),
         );
-        res.on('error', () => socket.end());
+        res.on("error", () => socket.end());
         res.pipe(socket);
       }
     });
 
     proxyReq.on("upgrade", function (proxyRes, proxySocket, proxyHead) {
-      socket.write(createHttpHeader("HTTP/1.1 101 Switching Protocols", proxyRes.headers));
+      socket.write(
+        createHttpHeader("HTTP/1.1 101 Switching Protocols", proxyRes.headers),
+      );
 
       if (head && head.length) proxySocket.write(head);
       if (proxyHead && proxyHead.length) socket.write(proxyHead);
