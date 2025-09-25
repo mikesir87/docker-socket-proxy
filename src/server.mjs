@@ -40,6 +40,7 @@ export class DockerSocketProxy {
   constructor(listenPath, forwardPath, middlewareChainFactory) {
     this.listenPath = listenPath;
     this.forwardPath = forwardPath;
+    this.forwardPathIsPort = !Number.isNaN(parseInt(this.forwardPath));
     this.middlewareChainFactory = middlewareChainFactory;
   }
 
@@ -97,9 +98,13 @@ export class DockerSocketProxy {
       headers: req.headers,
     };
 
-    const proxyReq = http.request(rightRequestOptions);
+    if (this.forwardPathIsPort) {
+      proxyReqOptions.port = this.forwardPath;
+    } else {
+      proxyReqOptions.socketPath = this.forwardPath;
+    }    
 
-    if (reqBody) proxyReq.write(reqBody);
+    const proxyReq = http.request(proxyReqOptions);
 
     proxyReq.on("error", (err) => {
       console.error("Error while proxying upgrade request", err);
@@ -204,9 +209,7 @@ export class DockerSocketProxy {
     );
 
     // Bail early without reading the body if needed
-    if (!middlewareChain.hasMiddleware() && 1 == 2) {
-      options.socketPath = this.forwardPath;
-
+    if (!middlewareChain.hasMiddleware()) {
       this.#sendProxyRequest(
         clientReq,
         clientRes,
@@ -234,7 +237,6 @@ export class DockerSocketProxy {
     }
 
     options.path = url.pathname + url.search;
-    options.socketPath = this.forwardPath;
 
     const bodyString = body ? JSON.stringify(body) : null;
     this.#sendProxyRequest(
@@ -261,6 +263,12 @@ export class DockerSocketProxy {
     bodyToSend,
     middlewareChain,
   ) {
+    if (this.forwardPathIsPort) {
+      proxyRequestOptions.port = this.forwardPath;
+    } else {
+      proxyRequestOptions.socketPath = this.forwardPath;
+    }
+
     if (bodyToSend && bodyToSend.length > 0)
       proxyRequestOptions.headers["content-length"] =
         Buffer.byteLength(bodyToSend);
