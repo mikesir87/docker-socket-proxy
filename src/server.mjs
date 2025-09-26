@@ -113,6 +113,8 @@ export class DockerSocketProxy {
 
     const proxyReq = http.request(proxyReqOptions);
 
+    if (tokens.includes("tcp") && head) proxyReq.write(head);
+
     proxyReq.on("error", (err) => {
       console.error("Error while proxying upgrade request", err);
       socket.end();
@@ -142,7 +144,8 @@ export class DockerSocketProxy {
         createHttpHeader("HTTP/1.1 101 Switching Protocols", proxyRes.headers),
       );
 
-      if (head && head.length) proxySocket.write(head);
+      if (tokens.includes("h2c") && head && head.length)
+        proxySocket.write(head);
       if (proxyHead && proxyHead.length) socket.write(proxyHead);
 
       proxySocket.setTimeout(0);
