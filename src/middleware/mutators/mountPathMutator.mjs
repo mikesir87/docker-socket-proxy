@@ -58,6 +58,9 @@ export class MountPathMutator {
 
         if (isVolume) {
           mount.Type = "volume";
+          if (mount.BindOptions) {
+            delete mount.BindOptions;
+          }
         }
 
         if (subPath) {
