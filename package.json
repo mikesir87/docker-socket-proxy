@@ -13,14 +13,14 @@
   },
   "dependencies": {
     "@swimlane/docker-reference": "^2.0.1",
-    "dockerode": "^4.0.7",
-    "glob": "^11.0.1",
-    "yaml": "^2.6.1"
+    "dockerode": "^4.0.9",
+    "glob": "^13.0.0",
+    "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@types/dockerode": "^3.3.43",
+    "@types/dockerode": "^4.0.1",
     "husky": "^9.1.7",
-    "jest": "^29.7.0",
+    "jest": "^30.2.0",
     "lint-staged": "^15.2.11",
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2"

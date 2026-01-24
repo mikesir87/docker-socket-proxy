@@ -1,12 +1,12 @@
 import { MountSourceGate } from "../../../src/middleware/gates/mountSourceGate.mjs";
-import jest from "jest-mock";
+import { fn } from "jest-mock";
 
 describe("MountSourceGate", () => {
   let middleware, metadataStore;
 
   beforeAll(() => {
     metadataStore = {
-      getVolumesForLabels: jest.fn().mockResolvedValue(Promise.resolve([])),
+      getVolumesForLabels: fn().mockResolvedValue(Promise.resolve([])),
     };
 
     middleware = new MountSourceGate({
