@@ -128,6 +128,66 @@ describe("MountSourceGate", () => {
       ).resolves.toBeUndefined();
     });
 
+    it("allows a volume matching a wildcard pattern (bind)", async () => {
+      const requestOptions = {};
+      const url = new URL("http://localhost/containers/create");
+      const body = {
+        HostConfig: {
+          Binds: ["labspace-data:/home/project"],
+        },
+      };
+
+      middleware = new MountSourceGate({
+        allowedSources: ["labspace-*"],
+      });
+
+      expect(
+        middleware.run(requestOptions, url, body),
+      ).resolves.toBeUndefined();
+    });
+
+    it("allows a volume matching a wildcard pattern (mount)", async () => {
+      const requestOptions = {};
+      const url = new URL("http://localhost/containers/create");
+      const body = {
+        HostConfig: {
+          Mounts: [
+            {
+              Type: "volume",
+              Source: "labspace-data",
+              Target: "/home/project",
+            },
+          ],
+        },
+      };
+
+      middleware = new MountSourceGate({
+        allowedSources: ["labspace-*"],
+      });
+
+      expect(
+        middleware.run(requestOptions, url, body),
+      ).resolves.toBeUndefined();
+    });
+
+    it("blocks a volume that does not match a wildcard pattern", async () => {
+      const requestOptions = {};
+      const url = new URL("http://localhost/containers/create");
+      const body = {
+        HostConfig: {
+          Binds: ["other-data:/home/project"],
+        },
+      };
+
+      middleware = new MountSourceGate({
+        allowedSources: ["labspace-*"],
+      });
+
+      expect(middleware.run(requestOptions, url, body)).rejects.toThrow(
+        "Mounting other-data is not allowed",
+      );
+    });
+
     it("allows a mount source that has a matching label (bind)", async () => {
       const requestOptions = {};
       const url = new URL("http://localhost/containers/create");

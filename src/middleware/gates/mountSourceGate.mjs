@@ -36,7 +36,7 @@ export class MountSourceGate {
     ];
 
     const blockedSourcesByName = sources.filter(
-      (source) => !this.allowedSources.includes(source),
+      (source) => !this.#matchesAllowedSource(source),
     );
 
     if (blockedSourcesByName.length === 0) {
@@ -51,6 +51,16 @@ export class MountSourceGate {
     if (blockedMount.length > 0) {
       throw new Error(`Mounting ${blockedMount[0]} is not allowed`);
     }
+  }
+
+  #matchesAllowedSource(source) {
+    return this.allowedSources.some((allowed) => {
+      if (allowed.endsWith("*")) {
+        const prefix = allowed.slice(0, -1);
+        return source.startsWith(prefix);
+      }
+      return source === allowed;
+    });
   }
 
   async #getVolumeNamesForLabels() {
