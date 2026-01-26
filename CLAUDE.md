@@ -47,7 +47,7 @@ Middleware is auto-discovered via glob in `chainFactory.mjs`. Place new files in
 
 - `src/index.mjs` - Entry point, bootstraps proxy
 - `src/server.mjs` - HTTP/Unix socket proxy implementation
-- `src/config.mjs` - Configuration loading (CONFIG_FILE or CONFIG_DATA env vars)
+- `src/config.mjs` - Configuration loading (CONFIG_FILE, CONFIG_DATA, or CONFIG_DIR env vars)
 - `src/chainFactory.mjs` - Middleware discovery and chain assembly
 - `src/metadataStore.mjs` - Docker API client for metadata lookups
 
@@ -68,9 +68,13 @@ responseFilters:
 ```
 
 Environment variables:
-- `CONFIG_FILE` or `CONFIG_DATA` - Middleware configuration
+- `CONFIG_FILE` - Path to a single YAML configuration file
+- `CONFIG_DATA` - Raw YAML configuration string
+- `CONFIG_DIR` - Directory containing multiple YAML config files (default: `/etc/docker-socket-proxy/config.d`). Files are loaded in alphabetical order and merged (arrays are concatenated)
 - `LISTEN_SOCKET_PATH` - Proxy socket path (default: `/tmp/docker.sock`)
 - `FORWARDING_SOCKET_PATH` - Docker socket to forward to (default: `/var/run/docker.sock`)
+
+Configuration source priority: `CONFIG_FILE` > `CONFIG_DATA` > `CONFIG_DIR`
 
 ## Testing
 

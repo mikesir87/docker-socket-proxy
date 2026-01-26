@@ -83,10 +83,11 @@ sequenceDiagram
 
 The socket proxy, by default, will allow all requests. To change the rules, you will need to provide a YAML config file (see [Proxy configuration](#proxy-configuration) below).
 
-To provide the configuration, you have two options:
+To provide the configuration, you have three options:
 
 1. **By file** - create a file and indicate its filepath by using the `CONFIG_FILE` environment variable
 2. **By environment variable** - specify the YAML in the `CONFIG_DATA` environment variable
+3. **By directory** - place multiple YAML files in a directory and specify the path using the `CONFIG_DIR` environment variable (defaults to `/etc/docker-socket-proxy/config.d`)
 
 The following Compose file does the following:
 
@@ -124,14 +125,55 @@ volumes:
 
 The following environment variables can be used to configure the proxy.
 
-Either `CONFIG_FILE` or `CONFIG_DATA` must be specified.
+At least one of `CONFIG_FILE`, `CONFIG_DATA`, or `CONFIG_DIR` must be specified (or the default config directory must exist).
 
 | Variable            | Description                                                                 | Default value           |
 |---------------------|-----------------------------------------------------------------------------|-------------------------|
-| `CONFIG_FILE`       | Path to the middleware configuration YAML configuration file.  | None                    |
+| `CONFIG_FILE`       | Path to a single YAML configuration file.  | None                    |
 | `CONFIG_DATA`       | YAML configuration provided as an environment variable.                   | None                    |
+| `CONFIG_DIR`        | Directory containing multiple YAML config files (`.yaml` or `.yml`). Files are loaded alphabetically and merged. | `/etc/docker-socket-proxy/config.d` |
 | `LISTEN_SOCKET_PATH`| Path where the new proxy socket will be created.  | `/tmp/docker.sock` |
 | `FORWARDING_SOCKET_PATH` | The socket the proxy should forward requests | `/var/run/docker.sock` |
+
+**Configuration source priority:** `CONFIG_FILE` > `CONFIG_DATA` > `CONFIG_DIR`
+
+### Directory-based configuration
+
+When using `CONFIG_DIR`, you can split your configuration across multiple files. This is useful for organizing configuration or when different teams manage different middleware.
+
+Files are loaded in alphabetical order and merged together. Arrays (`gates`, `mutators`, `responseFilters`) are concatenated, not replaced.
+
+Example directory structure:
+```
+/etc/docker-socket-proxy/config.d/
+├── 01-security.yaml
+├── 02-paths.yaml
+└── 03-filtering.yaml
+```
+
+`01-security.yaml`:
+```yaml
+gates:
+  - type: readonly
+```
+
+`02-paths.yaml`:
+```yaml
+mutators:
+  - type: mountPath
+    from: /workspaces/project
+    to: /home/user/project
+```
+
+`03-filtering.yaml`:
+```yaml
+responseFilters:
+  - type: labelFilter
+    requiredLabels:
+      environment: dev
+```
+
+The resulting merged configuration will contain all gates, mutators, and response filters from all files.
 
 
 ## Middleware configuration
