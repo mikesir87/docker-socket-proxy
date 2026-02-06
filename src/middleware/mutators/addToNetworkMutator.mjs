@@ -12,8 +12,6 @@ export class AddToNetworkMutator {
   }
 
   run(requestOptions, url, body) {
-    console.log("Going to add networks", JSON.stringify(body, null, 2));
-
     if (body.HostConfig.NetworkMode === "host") {
       console.warn(
         "Cannot add networks to a container with 'host' network mode. Skipping.",
