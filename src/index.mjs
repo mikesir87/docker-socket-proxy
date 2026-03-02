@@ -6,6 +6,8 @@ import { DockerSocketProxy } from "./server.mjs";
 const LISTEN_SOCKET_PATH = Config.getListeningSocketPath();
 const FORWARDING_SOCKET_PATH = Config.getForwardingSocketPath();
 
+console.log("A line change for a quick CI test");
+
 (async function () {
   const metadataStore = new MetadataStore();
 
